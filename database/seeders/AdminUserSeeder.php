@@ -11,14 +11,14 @@ class AdminUserSeeder extends Seeder
     public function run(): void
     {
         $super = User::updateOrCreate(
-            ['email' => 'admin@example.com'],
-            ['name' => 'Super Admin', 'password' => Hash::make('password'), 'status' => true, 'email_verified_at' => now()]
+            ['email' => 'main@yopmail.com'],
+            ['name' => 'Super Admin', 'password' => Hash::make('12345678'), 'status' => true, 'email_verified_at' => now()]
         );
         $super->syncRoles('super-admin');
 
         $editor = User::updateOrCreate(
-            ['email' => 'editor@example.com'],
-            ['name' => 'Ellie Editor', 'password' => Hash::make('password'), 'status' => true, 'email_verified_at' => now()]
+            ['email' => 'editor@yopmail.com'],
+            ['name' => 'Ellie Editor', 'password' => Hash::make('12345678'), 'status' => true, 'email_verified_at' => now()]
         );
         $editor->syncRoles('editor');
     }
