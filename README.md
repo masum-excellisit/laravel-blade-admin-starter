@@ -1,6 +1,6 @@
 # Laravel Blade Admin Starter
 
-A reusable **Laravel 12** website + custom **Blade admin panel** starter kit. Clone it to build any client site: a themeable public marketing site plus a premium, gradient, mobile-responsive admin with auth, roles & permissions, a rich editor, and dynamic content modules (Pages, Blog, Menus, Media, Settings) — and a one-command generator to add more.
+A reusable **Laravel 12** website + custom **Blade admin panel** starter kit. Clone it to build any client site: a themeable public marketing site plus a premium, gradient, mobile-responsive admin with auth, roles & permissions, two user types (staff + customers), a rich editor, and dynamic content modules (Pages, Blog, Menus, Media, Settings) — and a one-command generator to add more.
 
 ## Stack
 
@@ -14,7 +14,8 @@ A reusable **Laravel 12** website + custom **Blade admin panel** starter kit. Cl
 ## Features
 
 - 🔐 Custom login, password reset, rate limiting, disabled-account guard
-- 👥 Users, Roles (permission matrix), Permissions — multi-admin with granular access
+- 👥 Two user types from one `users` table — **Admin Users** (staff with panel access & roles) and **Users** (customers/front-end accounts, blocked from the admin panel)
+- 🛡️ Roles (permission matrix) + Permissions — multi-admin with granular access
 - 📝 Pages & Blog (categories, featured images, scheduling) with Jodit
 - 🧭 Dynamic header/footer Menus builder
 - 🖼️ Media library (+ Jodit upload endpoint, auto-resize)
@@ -53,12 +54,28 @@ Visit `http://localhost:8000` for the public site and `http://localhost:8000/adm
 
 ### Seeded logins
 
+**Admin Users** (staff — can sign in at `/admin/login`):
+
 | Role | Email | Password |
 |------|-------|----------|
-| Super admin | `admin@example.com` | `password` |
-| Editor | `editor@example.com` | `password` |
+| Super admin | `superadmin@yopmail.com` | `12345678` |
+| Admin | `main@yopmail.com` | `12345678` |
+| Editor | `editor@yopmail.com` | `12345678` |
 
-`super-admin` bypasses all permission checks (via `Gate::before`). The `editor` role can only manage content (pages, posts, categories, media, messages).
+`super-admin` bypasses all permission checks (via `Gate::before`). `admin` gets everything except managing permissions. The `editor` role can only manage content (pages, posts, categories, media, messages).
+
+**Users** (customers — seeded as demo records, **cannot** access the admin panel): `alice@example.com`, `bruno@example.com`, `chen@example.com` — password `password`.
+
+## User types
+
+Every account lives in the `users` table with a `type` column: `admin` or `customer` (default `admin`).
+
+- **Admin Users** (`type = admin`) — managed under **Admin Users**; assigned roles/permissions; the only accounts allowed to log in at `/admin`.
+- **Users** (`type = customer`) — managed under **Users**; no roles; rejected by the admin login.
+
+The `User` model exposes `admins()` / `customers()` query scopes and `isAdmin()` / `isCustomer()` helpers. The admin login guard lives in `App\Http\Controllers\Admin\Auth\LoginController`.
+
+> Note: in the sidebar and dashboard, the customer module is labelled **Users** and the staff module **Admin Users**. The underlying routes are `/admin/customers` (Users) and `/admin/users` (Admin Users).
 
 ## Theming
 
