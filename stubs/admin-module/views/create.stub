@@ -1,0 +1,6 @@
+@extends('layouts.admin')
+@section('title', 'New {{ Model }}')
+@section('content')
+<x-page-header title="New {{ Model }}" />
+<form method="POST" action="{{ route('admin.{{ table }}.store') }}">@include('admin.{{ table }}._form')</form>
+@endsection

@@ -1,0 +1,6 @@
+@extends('layouts.admin')
+@section('title', 'Edit {{ Model }}')
+@section('content')
+<x-page-header title="Edit {{ Model }}" />
+<form method="POST" action="{{ route('admin.{{ table }}.update', ${{ singularVar }}) }}">@method('PUT')@include('admin.{{ table }}._form')</form>
+@endsection
