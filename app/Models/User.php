@@ -16,9 +16,33 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasRoles, Notifiable;
 
-    protected $fillable = ['name', 'email', 'password', 'avatar', 'phone', 'status', 'last_login_at'];
+    public const TYPE_ADMIN = 'admin';
+
+    public const TYPE_CUSTOMER = 'customer';
+
+    protected $fillable = ['name', 'email', 'type', 'password', 'avatar', 'phone', 'status', 'last_login_at'];
 
     protected $hidden = ['password', 'remember_token'];
+
+    public function scopeAdmins($q)
+    {
+        return $q->where('type', self::TYPE_ADMIN);
+    }
+
+    public function scopeCustomers($q)
+    {
+        return $q->where('type', self::TYPE_CUSTOMER);
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->type === self::TYPE_ADMIN;
+    }
+
+    public function isCustomer(): bool
+    {
+        return $this->type === self::TYPE_CUSTOMER;
+    }
 
     /**
      * Get the attributes that should be cast.

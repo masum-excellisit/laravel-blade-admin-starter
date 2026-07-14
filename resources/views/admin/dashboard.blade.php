@@ -3,7 +3,7 @@
 @section('content')
 <x-page-header title="Dashboard" subtitle="Welcome back, {{ auth()->user()->name }}." />
 
-<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5 mb-8">
     @foreach($stats as $stat)
         @if($stat['can'] === null || auth()->user()->can($stat['can']))
         <a href="{{ route($stat['route']) }}" class="group relative overflow-hidden rounded-2xl p-6 brand-gradient text-white shadow-lg shadow-primary/20">

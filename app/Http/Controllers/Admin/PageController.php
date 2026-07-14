@@ -14,6 +14,7 @@ class PageController extends Controller
     public function index(Request $request)
     {
         $pages = Page::when($request->search, fn ($q, $s) => $q->where('title', 'like', "%$s%"))
+            ->when($request->status, fn ($q, $s) => $q->where('status', $s))
             ->latest()->paginate(12)->withQueryString();
 
         return view('admin.pages.index', compact('pages'));

@@ -13,7 +13,7 @@ class RolePermissionSeeder extends Seeder
     {
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
-        $modules = ['users', 'roles', 'permissions', 'pages', 'posts', 'categories', 'menus', 'media', 'settings', 'messages'];
+        $modules = ['users', 'customers', 'roles', 'permissions', 'pages', 'posts', 'categories', 'menus', 'media', 'settings', 'messages'];
         $actions = ['view', 'create', 'edit', 'delete'];
 
         foreach ($modules as $module) {

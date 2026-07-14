@@ -13,14 +13,15 @@ class DashboardController extends Controller
     public function index()
     {
         $stats = [
-            ['label' => 'Users', 'value' => User::count(), 'route' => 'admin.users.index', 'can' => 'users.view'],
+            ['label' => 'Users', 'value' => User::customers()->count(), 'route' => 'admin.customers.index', 'can' => 'customers.view'],
+            ['label' => 'Admin Users', 'value' => User::admins()->count(), 'route' => 'admin.users.index', 'can' => 'users.view'],
             ['label' => 'Pages', 'value' => Page::count(), 'route' => 'admin.pages.index', 'can' => 'pages.view'],
             ['label' => 'Posts', 'value' => Post::count(), 'route' => 'admin.posts.index', 'can' => 'posts.view'],
             ['label' => 'Messages', 'value' => ContactMessage::where('read', false)->count(), 'route' => 'admin.messages.index', 'can' => 'messages.view'],
         ];
 
         $recentPosts = Post::latest()->take(5)->get();
-        $recentUsers = User::latest()->take(5)->get();
+        $recentUsers = User::customers()->latest()->take(5)->get();
 
         return view('admin.dashboard', compact('stats', 'recentPosts', 'recentUsers'));
     }

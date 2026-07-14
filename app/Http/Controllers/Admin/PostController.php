@@ -15,6 +15,7 @@ class PostController extends Controller
     {
         $posts = Post::with('category', 'author')
             ->when($request->search, fn ($q, $s) => $q->where('title', 'like', "%$s%"))
+            ->when($request->status, fn ($q, $s) => $q->where('status', $s))
             ->latest()->paginate(12)->withQueryString();
 
         return view('admin.posts.index', compact('posts'));

@@ -1,6 +1,9 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
 
+/* Class-based dark mode (Tailwind v4 defaults to prefers-color-scheme). */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../views';
@@ -29,6 +32,11 @@
 .brand-gradient {
     background-image: linear-gradient(135deg, var(--grad-from), var(--grad-to));
 }
+.brand-gradient-soft {
+    background-image: linear-gradient(135deg,
+        color-mix(in srgb, var(--grad-from) 12%, transparent),
+        color-mix(in srgb, var(--grad-to) 12%, transparent));
+}
 .brand-gradient-text {
     background-image: linear-gradient(135deg, var(--grad-from), var(--grad-to));
     -webkit-background-clip: text;
@@ -38,8 +46,39 @@
 .brand-ring:focus {
     outline: none;
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 30%, transparent);
+    border-color: var(--c-primary);
 }
 
-/* Jodit tweaks */
-.jodit-container { border-radius: 0.75rem !important; }
+/* Premium ambient background for the admin shell */
+.admin-bg {
+    background-color: #f1f5f9;
+    background-image:
+        radial-gradient(60rem 60rem at 110% -10%, color-mix(in srgb, var(--c-primary) 10%, transparent), transparent 60%),
+        radial-gradient(50rem 50rem at -10% 110%, color-mix(in srgb, var(--c-secondary) 10%, transparent), transparent 60%);
+}
+.dark .admin-bg {
+    background-color: #0b1120;
+    background-image:
+        radial-gradient(60rem 60rem at 110% -10%, color-mix(in srgb, var(--c-primary) 18%, transparent), transparent 60%),
+        radial-gradient(50rem 50rem at -10% 110%, color-mix(in srgb, var(--c-secondary) 16%, transparent), transparent 60%);
+}
+
+/* Sidebar: subtle gradient wash over the base colour */
+.admin-sidebar {
+    background-color: var(--sidebar-bg);
+    background-image: linear-gradient(180deg,
+        color-mix(in srgb, var(--grad-from) 22%, transparent),
+        transparent 45%);
+}
+
+/* Jodit — dark-mode aware editor */
+.jodit-container { border-radius: 0.75rem !important; overflow: hidden; }
+.dark .jodit-container:not(.jodit_inline) { border-color: #334155 !important; }
+.dark .jodit-toolbar__box:not(:empty) { background: #1e293b !important; border-color: #334155 !important; }
+.dark .jodit-workplace,
+.dark .jodit-wysiwyg { background: #0f172a !important; color: #e2e8f0 !important; }
+.dark .jodit-status-bar { background: #1e293b !important; color: #94a3b8 !important; }
+.dark .jodit-toolbar-button__button:hover { background: #334155 !important; }
+.dark .jodit-icon { fill: #cbd5e1 !important; }
+
 [x-cloak] { display: none !important; }

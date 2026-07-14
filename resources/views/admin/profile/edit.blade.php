@@ -6,10 +6,8 @@
     <x-card title="Details">
         <form method="POST" action="{{ route('admin.profile.update') }}" enctype="multipart/form-data" class="space-y-5">
             @csrf @method('PUT')
-            <div class="flex items-center gap-4">
-                <span class="h-16 w-16 rounded-full brand-gradient text-white text-xl font-semibold flex items-center justify-center">{{ $user->initials() }}</span>
-                <div class="flex-1"><x-form.input name="avatar" type="file" label="Avatar" accept="image/*" /></div>
-            </div>
+            <x-form.image name="avatar" label="Avatar" rounded="rounded-full"
+                :current="$user->avatar ? \Illuminate\Support\Facades\Storage::disk('public')->url($user->avatar) : ''" />
             <x-form.input name="name" label="Name" :value="$user->name" required />
             <x-form.input name="email" type="email" label="Email" :value="$user->email" required />
             <x-form.input name="phone" label="Phone" :value="$user->phone" />

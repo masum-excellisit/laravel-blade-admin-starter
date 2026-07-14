@@ -9,13 +9,29 @@ use App\Models\Page;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class DemoContentSeeder extends Seeder
 {
     public function run(): void
     {
-        $author = User::where('email', 'admin@example.com')->first();
+        $author = User::admins()->first();
+
+        // Demo customers (non-admin users)
+        foreach ([
+            ['Alice Nguyen', 'alice@example.com'],
+            ['Bruno Silva', 'bruno@example.com'],
+            ['Chen Wei', 'chen@example.com'],
+        ] as [$name, $email]) {
+            User::firstOrCreate(['email' => $email], [
+                'name' => $name,
+                'type' => User::TYPE_CUSTOMER,
+                'password' => Hash::make('password'),
+                'status' => true,
+                'email_verified_at' => now(),
+            ]);
+        }
 
         $pages = [
             ['title' => 'About Us', 'is_static' => false, 'body' => '<h2>Who we are</h2><p>We build delightful software. This page is fully editable from the admin panel using the Jodit editor.</p>'],

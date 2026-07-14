@@ -34,6 +34,11 @@ class LoginController extends Controller
             throw ValidationException::withMessages(['email' => 'These credentials do not match our records.']);
         }
 
+        if (! Auth::user()->isAdmin()) {
+            Auth::logout();
+            throw ValidationException::withMessages(['email' => 'These credentials do not match our records.']);
+        }
+
         if (! Auth::user()->status) {
             Auth::logout();
             throw ValidationException::withMessages(['email' => 'Your account is disabled.']);

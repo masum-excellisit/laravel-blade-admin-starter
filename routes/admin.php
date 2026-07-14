@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\Auth\LoginController;
 use App\Http\Controllers\Admin\Auth\PasswordResetController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\MenuController;
@@ -39,6 +40,9 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('permission:users.view')->group(function () {
         Route::resource('users', UserController::class)->except('show');
+    });
+    Route::middleware('permission:customers.view')->group(function () {
+        Route::resource('customers', CustomerController::class)->except('show');
     });
     Route::middleware('permission:roles.view')->group(function () {
         Route::resource('roles', RoleController::class)->except('show');

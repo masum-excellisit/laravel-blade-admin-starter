@@ -16,9 +16,10 @@
             <div class="space-y-4">
                 <x-form.input name="site_name" label="Site name" :value="$general['site_name'] ?? ''" />
                 <x-form.textarea name="site_tagline" label="Tagline" :value="$general['site_tagline'] ?? ''" rows="2" />
-                <x-form.input name="site_logo" type="file" label="Logo" accept="image/*" />
-                @if($general['site_logo'] ?? false)<img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($general['site_logo']) }}" class="h-10">@endif
-                <x-form.input name="site_favicon" type="file" label="Favicon" accept="image/*" />
+                <x-form.image name="site_logo" label="Logo" rounded="rounded-xl"
+                    :current="($general['site_logo'] ?? false) ? \Illuminate\Support\Facades\Storage::disk('public')->url($general['site_logo']) : ''" />
+                <x-form.image name="site_favicon" label="Favicon" rounded="rounded-lg"
+                    :current="($general['site_favicon'] ?? false) ? \Illuminate\Support\Facades\Storage::disk('public')->url($general['site_favicon']) : ''" />
             </div>
         </x-card>
         <x-card title="Contact & social">

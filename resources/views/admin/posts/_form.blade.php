@@ -19,8 +19,8 @@
             </div>
         </x-card>
         <x-card title="Featured image">
-            @if($post->featured_image)<img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($post->featured_image) }}" class="rounded-xl mb-3 w-full object-cover">@endif
-            <x-form.input name="featured_image" type="file" accept="image/*" />
+            <x-form.image name="featured_image" rounded="rounded-xl"
+                :current="$post->featured_image ? \Illuminate\Support\Facades\Storage::disk('public')->url($post->featured_image) : ''" />
         </x-card>
     </div>
 </div>
