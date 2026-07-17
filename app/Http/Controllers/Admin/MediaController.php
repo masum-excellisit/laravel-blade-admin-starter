@@ -84,7 +84,7 @@ class MediaController extends Controller
         // Resize large images in place to keep uploads lean.
         if (str_starts_with((string) $file->getMimeType(), 'image/')) {
             $full = Storage::disk('public')->path($path);
-            $img = Image::decodePath($full);
+            $img = Image::read($full);
             if ($img->width() > 1600) {
                 $img->scaleDown(width: 1600)->save($full);
             }
