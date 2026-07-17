@@ -35,7 +35,15 @@ The naming is derived from the singular studly argument:
 | `Faq` | `faqs` | `Faq` | Faqs |
 | `ProductCategory` | `product_categories` | `ProductCategory` | Product Categories |
 
-Injection markers `// [admin-module routes]` and `// [admin-module nav]` must remain in place for the generator to work.
+Injection markers `// [admin-module routes]` (in `routes/admin.php`, **before Settings**) and `// [admin-module nav]` (in the sidebar, **before Settings**) must remain in place for the generator to work.
+
+Sidebar order convention:
+
+1. Dashboard → CMS Management → content modules (Users, Services, …, Menus, Media, Messages)
+2. **Generated modules are injected here** (before Settings)
+3. Settings
+4. Admin Users → Roles → Permissions (always last)
+
 
 ## 2. By hand
 

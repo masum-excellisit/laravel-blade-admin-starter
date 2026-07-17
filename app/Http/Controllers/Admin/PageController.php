@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\HandlesBulkActions;
+use App\Http\Controllers\Admin\Concerns\HandlesListQuery;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\PageRequest;
 use App\Models\Page;
@@ -9,15 +11,31 @@ use Illuminate\Http\Request;
 
 class PageController extends Controller
 {
+    use HandlesBulkActions, HandlesListQuery;
+
     protected array $templates = ['default' => 'Default', 'full-width' => 'Full width', 'sidebar' => 'With sidebar'];
 
     public function index(Request $request)
     {
-        $pages = Page::when($request->search, fn ($q, $s) => $q->where('title', 'like', "%$s%"))
-            ->when($request->status, fn ($q, $s) => $q->where('status', $s))
-            ->latest()->paginate(12)->withQueryString();
+        $query = Page::query();
+
+        if ($request->status) {
+            $query->where('status', $request->status);
+        }
+
+        $pages = $this->applyListQuery(
+            $query,
+            $request,
+            ['title', 'slug'],
+            ['title', 'slug', 'template', 'status', 'created_at'],
+        )->paginate(12)->withQueryString();
 
         return view('admin.pages.index', compact('pages'));
+    }
+
+    public function bulk(Request $request)
+    {
+        return $this->runBulkAction($request, Page::class, 'pages');
     }
 
     public function create()

@@ -13,7 +13,11 @@ class RolePermissionSeeder extends Seeder
     {
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
-        $modules = ['users', 'customers', 'roles', 'permissions', 'pages', 'posts', 'categories', 'menus', 'media', 'settings', 'messages'];
+        $modules = [
+            'users', 'customers', 'roles', 'permissions',
+            'cms', 'services', 'testimonials', 'jobs', 'job-applications',
+            'pages', 'posts', 'categories', 'menus', 'media', 'settings', 'messages',
+        ];
         $actions = ['view', 'create', 'edit', 'delete'];
 
         foreach ($modules as $module) {
@@ -26,7 +30,6 @@ class RolePermissionSeeder extends Seeder
         $admin = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
         $editor = Role::firstOrCreate(['name' => 'editor', 'guard_name' => 'web']);
 
-        // super-admin bypasses via Gate::before, but sync all for clarity
         $superAdmin->syncPermissions(Permission::all());
 
         $admin->syncPermissions(Permission::whereNotIn('name', [
@@ -35,6 +38,11 @@ class RolePermissionSeeder extends Seeder
         ])->get());
 
         $editor->syncPermissions(Permission::whereIn('name', [
+            'cms.view', 'cms.edit',
+            'services.view', 'services.create', 'services.edit', 'services.delete',
+            'testimonials.view', 'testimonials.create', 'testimonials.edit', 'testimonials.delete',
+            'jobs.view', 'jobs.create', 'jobs.edit', 'jobs.delete',
+            'job-applications.view', 'job-applications.edit',
             'pages.view', 'pages.create', 'pages.edit',
             'posts.view', 'posts.create', 'posts.edit', 'posts.delete',
             'categories.view', 'categories.create', 'categories.edit',

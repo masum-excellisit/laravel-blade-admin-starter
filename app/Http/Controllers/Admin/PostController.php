@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\HandlesBulkActions;
+use App\Http\Controllers\Admin\Concerns\HandlesListQuery;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\PostRequest;
 use App\Models\Category;
@@ -11,14 +13,29 @@ use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
+    use HandlesBulkActions, HandlesListQuery;
+
     public function index(Request $request)
     {
-        $posts = Post::with('category', 'author')
-            ->when($request->search, fn ($q, $s) => $q->where('title', 'like', "%$s%"))
-            ->when($request->status, fn ($q, $s) => $q->where('status', $s))
-            ->latest()->paginate(12)->withQueryString();
+        $query = Post::with('category', 'author');
+
+        if ($request->status) {
+            $query->where('status', $request->status);
+        }
+
+        $posts = $this->applyListQuery(
+            $query,
+            $request,
+            ['title'],
+            ['title', 'status', 'published_at', 'created_at'],
+        )->paginate(12)->withQueryString();
 
         return view('admin.posts.index', compact('posts'));
+    }
+
+    public function bulk(Request $request)
+    {
+        return $this->runBulkAction($request, Post::class, 'posts');
     }
 
     public function create()

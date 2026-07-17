@@ -15,9 +15,20 @@
     </x-slot:filters>
 </x-search>
 
-<x-table :headings="['Title', 'Category', 'Author', 'Status', 'Published', '']">
+<x-table bulk :columns="[
+    ['key' => 'title', 'label' => 'Title', 'sortable' => true],
+    ['key' => null, 'label' => 'Category', 'sortable' => false],
+    ['key' => null, 'label' => 'Author', 'sortable' => false],
+    ['key' => 'status', 'label' => 'Status', 'sortable' => true],
+    ['key' => 'published_at', 'label' => 'Published', 'sortable' => true],
+    ['key' => null, 'label' => '', 'sortable' => false],
+]">
+    <x-slot:toolbar>
+        <x-bulk-actions :action="route('admin.posts.bulk')" :options="['delete' => 'Delete selected', 'publish' => 'Publish', 'draft' => 'Set draft']" />
+    </x-slot:toolbar>
     @forelse($posts as $post)
     <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/60">
+        <x-table-checkbox :id="$post->id" />
         <td class="px-4 py-3 font-medium">{{ $post->title }}</td>
         <td class="px-4 py-3 text-slate-500">{{ $post->category?->name ?? '—' }}</td>
         <td class="px-4 py-3 text-slate-500">{{ $post->author?->name ?? '—' }}</td>
@@ -31,7 +42,7 @@
             </div>
         </td>
     </tr>
-    @empty<tr><td colspan="6" class="px-4 py-12 text-center text-slate-400">No posts yet.</td></tr>@endforelse
+    @empty<tr><td colspan="7" class="px-4 py-12 text-center text-slate-400">No posts yet.</td></tr>@endforelse
 </x-table>
 {{ $posts->links() }}
 @endsection

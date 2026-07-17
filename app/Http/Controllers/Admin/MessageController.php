@@ -2,15 +2,31 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\HandlesBulkActions;
+use App\Http\Controllers\Admin\Concerns\HandlesListQuery;
 use App\Http\Controllers\Controller;
 use App\Models\ContactMessage;
 use Illuminate\Http\Request;
 
 class MessageController extends Controller
 {
-    public function index()
+    use HandlesBulkActions, HandlesListQuery;
+
+    public function index(Request $request)
     {
-        return view('admin.messages.index', ['messages' => ContactMessage::latest()->paginate(15)]);
+        $messages = $this->applyListQuery(
+            ContactMessage::query(),
+            $request,
+            ['name', 'email', 'subject'],
+            ['name', 'email', 'created_at'],
+        )->paginate(15)->withQueryString();
+
+        return view('admin.messages.index', compact('messages'));
+    }
+
+    public function bulk(Request $request)
+    {
+        return $this->runBulkAction($request, ContactMessage::class, 'messages');
     }
 
     public function show(ContactMessage $message)

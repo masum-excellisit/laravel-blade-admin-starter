@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\HandlesBulkActions;
+use App\Http\Controllers\Admin\Concerns\HandlesListQuery;
 use App\Http\Controllers\Controller;
 use App\Models\Menu;
 use App\Models\MenuItem;
@@ -10,9 +12,23 @@ use Illuminate\Http\Request;
 
 class MenuController extends Controller
 {
-    public function index()
+    use HandlesBulkActions, HandlesListQuery;
+
+    public function index(Request $request)
     {
-        return view('admin.menus.index', ['menus' => Menu::withCount('items')->get()]);
+        $menus = $this->applyListQuery(
+            Menu::withCount('items'),
+            $request,
+            ['name', 'location'],
+            ['name', 'location', 'created_at'],
+        )->paginate(12)->withQueryString();
+
+        return view('admin.menus.index', compact('menus'));
+    }
+
+    public function bulk(Request $request)
+    {
+        return $this->runBulkAction($request, Menu::class, 'menus');
     }
 
     public function create()
@@ -25,7 +41,7 @@ class MenuController extends Controller
         abort_unless($request->user()->can('menus.create'), 403);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'location' => ['nullable', 'string', 'max:100'],
+            'location' => ['required', 'in:header,footer'],
         ]);
         $menu = Menu::create($data);
 
@@ -45,7 +61,7 @@ class MenuController extends Controller
         abort_unless($request->user()->can('menus.edit'), 403);
         $menu->update($request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'location' => ['nullable', 'string', 'max:100'],
+            'location' => ['required', 'in:header,footer'],
         ]));
 
         return back()->with('success', 'Menu updated.');
@@ -85,7 +101,11 @@ class MenuController extends Controller
     public function reorder(Request $request, Menu $menu)
     {
         abort_unless($request->user()->can('menus.edit'), 403);
-        foreach ($request->input('order', []) as $position => $id) {
+        $data = $request->validate([
+            'order' => ['required', 'array'],
+            'order.*' => ['integer'],
+        ]);
+        foreach ($data['order'] as $position => $id) {
             MenuItem::where('id', $id)->where('menu_id', $menu->id)->update(['order' => $position]);
         }
 

@@ -15,9 +15,19 @@
     </x-slot:filters>
 </x-search>
 
-<x-table :headings="['Title', 'Slug', 'Template', 'Status', '']">
+<x-table bulk :columns="[
+    ['key' => 'title', 'label' => 'Title', 'sortable' => true],
+    ['key' => 'slug', 'label' => 'Slug', 'sortable' => true],
+    ['key' => 'template', 'label' => 'Template', 'sortable' => true],
+    ['key' => 'status', 'label' => 'Status', 'sortable' => true],
+    ['key' => null, 'label' => '', 'sortable' => false],
+]">
+    <x-slot:toolbar>
+        <x-bulk-actions :action="route('admin.pages.bulk')" :options="['delete' => 'Delete selected', 'publish' => 'Publish', 'draft' => 'Set draft']" />
+    </x-slot:toolbar>
     @forelse($pages as $page)
     <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/60">
+        <x-table-checkbox :id="$page->id" />
         <td class="px-4 py-3 font-medium">{{ $page->title }}</td>
         <td class="px-4 py-3 text-slate-500">/{{ $page->slug }}</td>
         <td class="px-4 py-3 text-slate-500">{{ $page->template }}</td>
@@ -30,7 +40,7 @@
             </div>
         </td>
     </tr>
-    @empty<tr><td colspan="5" class="px-4 py-12 text-center text-slate-400">No pages yet.</td></tr>@endforelse
+    @empty<tr><td colspan="6" class="px-4 py-12 text-center text-slate-400">No pages yet.</td></tr>@endforelse
 </x-table>
 {{ $pages->links() }}
 @endsection

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\HandlesBulkActions;
+use App\Http\Controllers\Admin\Concerns\HandlesListQuery;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -9,11 +11,23 @@ use Spatie\Permission\Models\Permission;
 
 class PermissionController extends Controller
 {
-    public function index()
+    use HandlesBulkActions, HandlesListQuery;
+
+    public function index(Request $request)
     {
-        $permissions = Permission::orderBy('name')->get()->groupBy(fn ($p) => explode('.', $p->name)[0]);
+        $permissions = $this->applyListQuery(
+            Permission::query(),
+            $request,
+            ['name'],
+            ['name', 'created_at'],
+        )->paginate(24)->withQueryString();
 
         return view('admin.permissions.index', compact('permissions'));
+    }
+
+    public function bulk(Request $request)
+    {
+        return $this->runBulkAction($request, Permission::class, 'permissions');
     }
 
     public function create()

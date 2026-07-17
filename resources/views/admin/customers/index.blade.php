@@ -17,15 +17,27 @@
     </x-slot:filters>
 </x-search>
 
-<x-table :headings="['Customer', 'Phone', 'Status', 'Joined', '']">
+<x-table bulk :columns="[
+    ['key' => 'name', 'label' => 'Name', 'sortable' => true],
+    ['key' => 'email', 'label' => 'Email', 'sortable' => true],
+    ['key' => null, 'label' => 'Phone', 'sortable' => false],
+    ['key' => 'status', 'label' => 'Status', 'sortable' => true],
+    ['key' => 'created_at', 'label' => 'Joined', 'sortable' => true],
+    ['key' => null, 'label' => '', 'sortable' => false],
+]">
+    <x-slot:toolbar>
+        <x-bulk-actions :action="route('admin.customers.bulk')" :options="['delete' => 'Delete selected', 'activate' => 'Activate', 'deactivate' => 'Deactivate']" />
+    </x-slot:toolbar>
     @forelse($customers as $customer)
     <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/60">
+        <x-table-checkbox :id="$customer->id" />
         <td class="px-4 py-3">
             <div class="flex items-center gap-3">
                 <span class="h-9 w-9 rounded-full brand-gradient text-white text-xs font-semibold flex items-center justify-center">{{ $customer->initials() }}</span>
-                <div><p class="font-medium text-slate-800 dark:text-slate-100">{{ $customer->name }}</p><p class="text-xs text-slate-400">{{ $customer->email }}</p></div>
+                <p class="font-medium text-slate-800 dark:text-slate-100">{{ $customer->name }}</p>
             </div>
         </td>
+        <td class="px-4 py-3 text-slate-500">{{ $customer->email }}</td>
         <td class="px-4 py-3 text-slate-500">{{ $customer->phone ?? '—' }}</td>
         <td class="px-4 py-3"><x-badge :color="$customer->status ? 'green' : 'red'">{{ $customer->status ? 'Active' : 'Disabled' }}</x-badge></td>
         <td class="px-4 py-3 text-slate-500">{{ $customer->created_at->format('M j, Y') }}</td>
@@ -40,7 +52,7 @@
         </td>
     </tr>
     @empty
-    <tr><td colspan="5" class="px-4 py-12 text-center text-slate-400">No customers found.</td></tr>
+    <tr><td colspan="7" class="px-4 py-12 text-center text-slate-400">No customers found.</td></tr>
     @endforelse
 </x-table>
 {{ $customers->links() }}

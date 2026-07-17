@@ -16,13 +16,16 @@ A reusable **Laravel 12** website + custom **Blade admin panel** starter kit. Cl
 - 🔐 Custom login, password reset, rate limiting, disabled-account guard
 - 👥 Two user types from one `users` table — **Admin Users** (staff with panel access & roles) and **Users** (customers/front-end accounts, blocked from the admin panel)
 - 🛡️ Roles (permission matrix) + Permissions — multi-admin with granular access
+- 🧱 **CMS Management** for fixed pages (Home, About, Services, How It Works, Careers, Contact) with sectioned text/image fields
+- 🧩 Modules: **Services**, **Testimonials**, **Jobs**, **Job Applications**
 - 📝 Pages & Blog (categories, featured images, scheduling) with Jodit
-- 🧭 Dynamic header/footer Menus builder
+- 🧭 Header/footer **Menus** with drag-and-drop item ordering
+- 🔍 Admin tables: search, click-to-sort columns, multi-select bulk actions
 - 🖼️ Media library (+ Jodit upload endpoint, auto-resize)
 - ✉️ Contact form → stored messages
 - ⚙️ Settings: General, **Mail** (DB-driven SMTP + test email), **Theme** (gradient colours drive both admin & public site)
 - 🎨 Fully themeable via CSS variables — reskin per client without touching code
-- ⚡ `php artisan make:admin-module {Name}` scaffolds a complete CRUD module
+- ⚡ `php artisan make:admin-module {Name}` scaffolds a complete CRUD module (injected **before Settings**)
 - 📱 Responsive: sidebar drawer, responsive tables/forms, light/dark mode
 
 ## Setup

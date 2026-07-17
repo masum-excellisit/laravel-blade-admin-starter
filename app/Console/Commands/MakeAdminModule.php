@@ -87,6 +87,7 @@ class MakeAdminModule extends Command
         $marker = '// [admin-module routes]';
         $block = <<<PHP
     Route::middleware('permission:{$table}.view')->group(function () {
+            Route::post('{$table}/bulk', [\\App\\Http\\Controllers\\Admin\\{$model}Controller::class, 'bulk'])->name('{$table}.bulk');
             Route::resource('{$table}', \\App\\Http\\Controllers\\Admin\\{$model}Controller::class)->except('show');
         });
 
