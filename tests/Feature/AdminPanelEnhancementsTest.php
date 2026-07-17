@@ -61,6 +61,19 @@ class AdminPanelEnhancementsTest extends TestCase
             ->assertSee('About');
     }
 
+    public function test_table_search_is_live_without_filter_button(): void
+    {
+        $html = $this->actingAs($this->admin())
+            ->get(route('admin.pages.index'))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringNotContainsString('> Filter</', $html);
+        $this->assertStringNotContainsString('Filter</button>', $html);
+        $this->assertStringContainsString('submitLive()', $html);
+        $this->assertStringContainsString('name="search"', $html);
+    }
+
     public function test_bulk_delete_pages(): void
     {
         $admin = $this->admin();
