@@ -33,7 +33,8 @@ class RolePermissionsUiTest extends TestCase
             ->assertSee('Create');
 
         $html = $response->getContent();
-        $this->assertStringContainsString('bg-indigo-50/80', $html);
+        $this->assertStringContainsString('perm-card__avatar', $html);
+        $this->assertStringContainsString('perm-row__icon--create', $html);
         $this->assertStringNotContainsString('Search permissions…', $html);
     }
 
