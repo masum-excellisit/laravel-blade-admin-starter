@@ -35,9 +35,34 @@ class SettingsSeeder extends Seeder
             ['mail', 'mail_encryption', 'tls', 'text'],
             ['mail', 'mail_from_address', 'hello@example.com', 'text'],
             ['mail', 'mail_from_name', 'Blade Admin Starter', 'text'],
+            // analytics
+            ['analytics', 'analytics_ga4_id', '', 'text'],
+            ['analytics', 'analytics_gtm_id', '', 'text'],
+            ['analytics', 'analytics_plausible_domain', '', 'text'],
+            // maintenance
+            ['maintenance', 'maintenance_enabled', '0', 'boolean'],
+            ['maintenance', 'maintenance_message', 'We are making improvements and will be back shortly.', 'textarea'],
+            ['maintenance', 'maintenance_headline', 'We will be right back', 'text'],
+            // cookie
+            ['cookie', 'cookie_enabled', '1', 'boolean'],
+            ['cookie', 'cookie_message', 'We use cookies to improve your browsing experience.', 'textarea'],
+            ['cookie', 'cookie_policy_url', '', 'text'],
         ];
 
         foreach ($defaults as [$group, $key, $value, $type]) {
+            Setting::firstOrCreate(['key' => $key], ['group' => $group, 'value' => $value, 'type' => $type]);
+        }
+
+        $contactEmail = Setting::where('key', 'contact_email')->value('value') ?? '';
+        $notificationDefaults = [
+            ['notifications', 'notify_contact_email', $contactEmail, 'text'],
+            ['notifications', 'notify_job_applications', '1', 'boolean'],
+            ['notifications', 'notify_auto_reply', '0', 'boolean'],
+            ['notifications', 'notify_auto_reply_subject', 'Thanks for contacting us', 'text'],
+            ['notifications', 'notify_auto_reply_body', 'Thanks for reaching out. We received your message and will respond soon.', 'textarea'],
+        ];
+
+        foreach ($notificationDefaults as [$group, $key, $value, $type]) {
             Setting::firstOrCreate(['key' => $key], ['group' => $group, 'value' => $value, 'type' => $type]);
         }
 

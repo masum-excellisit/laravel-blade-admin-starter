@@ -8,7 +8,8 @@ class Post extends Model
 {
     protected $fillable = [
         'title', 'slug', 'excerpt', 'body', 'featured_image',
-        'category_id', 'author_id', 'status', 'published_at',
+        'category_id', 'author_id', 'meta_title', 'meta_description',
+        'og_image', 'canonical_url', 'status', 'published_at',
     ];
 
     protected $casts = ['published_at' => 'datetime'];

@@ -8,7 +8,7 @@ class Page extends Model
 {
     protected $fillable = [
         'title', 'slug', 'body', 'meta_title', 'meta_description',
-        'template', 'status', 'is_static',
+        'og_image', 'canonical_url', 'template', 'status', 'is_static',
     ];
 
     protected $casts = ['is_static' => 'boolean'];

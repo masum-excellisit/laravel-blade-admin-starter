@@ -17,6 +17,7 @@ class RolePermissionSeeder extends Seeder
             'users', 'customers', 'roles', 'permissions',
             'cms', 'services', 'testimonials', 'jobs', 'job-applications',
             'pages', 'posts', 'categories', 'menus', 'media', 'settings', 'messages',
+            'redirects', 'activity-logs', 'blocks', 'forms', 'faqs', 'team', 'portfolio', 'backups',
         ];
         $actions = ['view', 'create', 'edit', 'delete'];
 
@@ -49,6 +50,13 @@ class RolePermissionSeeder extends Seeder
             'media.view', 'media.create', 'media.delete',
             'menus.view', 'menus.edit',
             'messages.view',
+            'redirects.view',
+            'activity-logs.view',
+            'blocks.view', 'blocks.edit',
+            'forms.view',
+            'faqs.view', 'faqs.create', 'faqs.edit', 'faqs.delete',
+            'team.view', 'team.create', 'team.edit', 'team.delete',
+            'portfolio.view', 'portfolio.create', 'portfolio.edit', 'portfolio.delete',
         ])->get());
     }
 }
