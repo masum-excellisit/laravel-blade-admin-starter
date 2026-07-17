@@ -3,8 +3,11 @@
 use App\Http\Controllers\Admin\Auth\LoginController;
 use App\Http\Controllers\Admin\Auth\PasswordResetController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\CmsController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\JobApplicationController;
+use App\Http\Controllers\Admin\JobListingController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\MenuController;
 use App\Http\Controllers\Admin\MessageController;
@@ -13,7 +16,9 @@ use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\TestimonialController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -54,6 +59,36 @@ Route::middleware('auth')->group(function () {
         Route::post('permissions/bulk', [PermissionController::class, 'bulk'])->name('permissions.bulk');
         Route::resource('permissions', PermissionController::class)->except('show');
     });
+    Route::middleware('permission:cms.view')->group(function () {
+        Route::get('cms', [CmsController::class, 'index'])->name('cms.index');
+        Route::get('cms/{page}', [CmsController::class, 'edit'])->name('cms.edit');
+        Route::put('cms/{page}', [CmsController::class, 'update'])->name('cms.update');
+    });
+
+    Route::middleware('permission:services.view')->group(function () {
+        Route::post('services/bulk', [ServiceController::class, 'bulk'])->name('services.bulk');
+        Route::resource('services', ServiceController::class)->except('show');
+    });
+
+    Route::middleware('permission:testimonials.view')->group(function () {
+        Route::post('testimonials/bulk', [TestimonialController::class, 'bulk'])->name('testimonials.bulk');
+        Route::resource('testimonials', TestimonialController::class)->except('show');
+    });
+
+    Route::middleware('permission:jobs.view')->group(function () {
+        Route::post('jobs/bulk', [JobListingController::class, 'bulk'])->name('jobs.bulk');
+        Route::resource('jobs', JobListingController::class)->except('show')
+            ->parameters(['jobs' => 'jobListing']);
+    });
+
+    Route::middleware('permission:job-applications.view')->group(function () {
+        Route::post('job-applications/bulk', [JobApplicationController::class, 'bulk'])->name('job-applications.bulk');
+        Route::get('job-applications', [JobApplicationController::class, 'index'])->name('job-applications.index');
+        Route::get('job-applications/{jobApplication}', [JobApplicationController::class, 'show'])->name('job-applications.show');
+        Route::put('job-applications/{jobApplication}', [JobApplicationController::class, 'update'])->name('job-applications.update');
+        Route::delete('job-applications/{jobApplication}', [JobApplicationController::class, 'destroy'])->name('job-applications.destroy');
+    });
+
     Route::middleware('permission:pages.view')->group(function () {
         Route::post('pages/bulk', [PageController::class, 'bulk'])->name('pages.bulk');
         Route::resource('pages', PageController::class)->except('show');
@@ -88,11 +123,11 @@ Route::middleware('auth')->group(function () {
         Route::delete('messages/{message}', [MessageController::class, 'destroy'])->name('messages.destroy');
     });
 
+    // [admin-module routes] — do not remove; make:admin-module injects here (before settings).
+
     Route::middleware('permission:settings.view')->group(function () {
         Route::get('settings', [SettingController::class, 'edit'])->name('settings.edit');
         Route::put('settings', [SettingController::class, 'update'])->name('settings.update');
         Route::post('settings/test-mail', [SettingController::class, 'testMail'])->name('settings.test-mail');
     });
-
-    // [admin-module routes] — do not remove; make:admin-module injects here.
 });

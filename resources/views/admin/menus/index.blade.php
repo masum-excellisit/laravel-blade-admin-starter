@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 @section('title', 'Menus')
 @section('content')
-<x-page-header title="Menus" subtitle="Build navigation for the public site.">
+<x-page-header title="Menus" subtitle="Header and footer navigation for the public site.">
     <x-slot:actions>@can('menus.create')<x-btn :href="route('admin.menus.create')"><x-icon name="plus" class="w-4 h-4" /> New menu</x-btn>@endcan</x-slot:actions>
 </x-page-header>
 
