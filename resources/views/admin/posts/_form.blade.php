@@ -22,5 +22,6 @@
             <x-form.image name="featured_image" rounded="rounded-xl"
                 :current="$post->featured_image ? \Illuminate\Support\Facades\Storage::disk('public')->url($post->featured_image) : ''" />
         </x-card>
+        <x-seo-fields :model="$post" />
     </div>
 </div>

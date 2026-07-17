@@ -28,6 +28,7 @@ $nav = [
     ['label' => 'Menus', 'route' => 'admin.menus.index', 'icon' => 'M4 6h16M4 12h16M4 18h16', 'can' => 'menus.view'],
     ['label' => 'Media', 'route' => 'admin.media.index', 'icon' => 'M4 5a2 2 0 012-2h12a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm4 8l2.5 3 3.5-4.5L19 19', 'can' => 'media.view'],
     ['label' => 'Messages', 'route' => 'admin.messages.index', 'icon' => 'M3 8l9 6 9-6M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', 'can' => 'messages.view'],
+    ['label' => 'Redirects', 'route' => 'admin.redirects.index', 'icon' => 'M17 7h-7a4 4 0 000 8h1m-4-4l4-4m-4 4l4 4m3-8h3a4 4 0 010 8h-7', 'can' => 'redirects.view'],
     ['label' => 'Blocks', 'route' => 'admin.blocks.index', 'icon' => 'M4 5h16M4 12h16M4 19h16', 'can' => 'blocks.view'],
     ['label' => 'Forms', 'route' => 'admin.forms.index', 'icon' => 'M9 12h6M9 16h6M8 4h8a2 2 0 012 2v12a2 2 0 01-2 2H8a2 2 0 01-2-2V6a2 2 0 012-2z', 'can' => 'forms.view'],
     // [admin-module nav] — do not remove; make:admin-module injects here (before Settings).

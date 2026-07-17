@@ -1,6 +1,16 @@
 @extends('layouts.app')
-@section('title', $post->title)
-@section('meta_description', $post->excerpt)
+@section('title', $post->meta_title ?: $post->title)
+@php
+    $postOgImage = $post->og_image ?: ($post->featured_image ? \Illuminate\Support\Facades\Storage::disk('public')->url($post->featured_image) : null);
+@endphp
+@push('meta')
+<x-seo-meta
+    :title="$post->meta_title ?: $post->title"
+    :description="$post->meta_description ?: $post->excerpt"
+    :og-image="$postOgImage"
+    :canonical="$post->canonical_url ?: route('blog.show', $post->slug)"
+/>
+@endpush
 @section('content')
 <div class="brand-gradient text-white">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 py-20 text-center">

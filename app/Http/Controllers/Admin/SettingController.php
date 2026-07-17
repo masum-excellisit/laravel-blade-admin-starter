@@ -15,6 +15,10 @@ class SettingController extends Controller
             'general' => Setting::group('general'),
             'theme' => Setting::group('theme'),
             'mail' => Setting::group('mail'),
+            'analytics' => Setting::group('analytics'),
+            'maintenance' => Setting::group('maintenance'),
+            'notifications' => Setting::group('notifications'),
+            'cookie' => Setting::group('cookie'),
         ]);
     }
 
@@ -26,6 +30,10 @@ class SettingController extends Controller
             'general' => ['site_name', 'site_tagline', 'contact_email', 'contact_phone', 'contact_address', 'social_twitter', 'social_github', 'social_linkedin'],
             'theme' => ['theme_primary', 'theme_secondary', 'theme_accent', 'theme_sidebar', 'theme_mode'],
             'mail' => ['mail_host', 'mail_port', 'mail_username', 'mail_password', 'mail_encryption', 'mail_from_address', 'mail_from_name'],
+            'analytics' => ['analytics_ga4_id', 'analytics_gtm_id', 'analytics_plausible_domain'],
+            'maintenance' => ['maintenance_enabled', 'maintenance_headline', 'maintenance_message'],
+            'notifications' => ['notify_contact_email', 'notify_job_applications', 'notify_auto_reply', 'notify_auto_reply_subject', 'notify_auto_reply_body'],
+            'cookie' => ['cookie_enabled', 'cookie_message', 'cookie_policy_url'],
         ];
 
         foreach ($keys as $group => $groupKeys) {

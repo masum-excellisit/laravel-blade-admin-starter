@@ -2,9 +2,9 @@
 @section('title', 'Settings')
 @section('content')
 <div x-data="{ tab: 'general' }">
-<x-page-header title="Settings" subtitle="Configure your site, mail, and theme." />
+<x-page-header title="Settings" subtitle="Configure your site, mail, theme, analytics, maintenance, and privacy options." />
 <div class="flex gap-2 mb-6 border-b border-slate-200 dark:border-slate-700">
-    @foreach(['general'=>'General','theme'=>'Theme','mail'=>'Mail'] as $key=>$label)
+    @foreach(['general'=>'General','theme'=>'Theme','mail'=>'Mail','analytics'=>'Analytics','maintenance'=>'Maintenance','notifications'=>'Notifications','cookie'=>'Cookie'] as $key=>$label)
     <button x-on:click="tab='{{ $key }}'" :class="tab==='{{ $key }}' ? 'border-primary text-primary' : 'border-transparent text-slate-500'" class="px-4 py-2.5 -mb-px border-b-2 font-medium text-sm">{{ $label }}</button>
     @endforeach
 </div>
@@ -61,6 +61,68 @@
                 <x-form.select name="mail_encryption" label="Encryption" :options="['tls'=>'TLS','ssl'=>'SSL','null'=>'None']" :selected="$mail['mail_encryption'] ?? 'tls'" />
                 <x-form.input name="mail_from_address" label="From address" :value="$mail['mail_from_address'] ?? ''" />
                 <x-form.input name="mail_from_name" label="From name" :value="$mail['mail_from_name'] ?? ''" />
+            </div>
+        </x-card>
+    </div>
+
+    <!-- ANALYTICS -->
+    <div x-show="tab==='analytics'" x-cloak class="max-w-2xl">
+        <x-card title="Tracking scripts">
+            <div class="space-y-4">
+                <x-form.input name="analytics_gtm_id" label="Google Tag Manager ID" :value="$analytics['analytics_gtm_id'] ?? ''" hint="Example: GTM-XXXXXXX" />
+                <x-form.input name="analytics_ga4_id" label="GA4 measurement ID" :value="$analytics['analytics_ga4_id'] ?? ''" hint="Example: G-XXXXXXXXXX" />
+                <x-form.input name="analytics_plausible_domain" label="Plausible domain" :value="$analytics['analytics_plausible_domain'] ?? ''" hint="Example: example.com" />
+            </div>
+        </x-card>
+    </div>
+
+    <!-- MAINTENANCE -->
+    <div x-show="tab==='maintenance'" x-cloak class="max-w-2xl">
+        <x-card title="Maintenance mode">
+            <div class="space-y-4">
+                <input type="hidden" name="maintenance_enabled" value="0">
+                <label class="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
+                    <input type="checkbox" name="maintenance_enabled" value="1" @checked(in_array(strtolower((string)($maintenance['maintenance_enabled'] ?? '0')), ['1','true','yes','on'], true)) class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                    Enable maintenance mode for public visitors
+                </label>
+                <x-form.input name="maintenance_headline" label="Headline" :value="$maintenance['maintenance_headline'] ?? ''" />
+                <x-form.textarea name="maintenance_message" label="Message" :value="$maintenance['maintenance_message'] ?? ''" rows="3" />
+            </div>
+        </x-card>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div x-show="tab==='notifications'" x-cloak class="max-w-2xl">
+        <x-card title="Notifications">
+            <div class="space-y-4">
+                <x-form.input name="notify_contact_email" label="Notification email" :value="$notifications['notify_contact_email'] ?? ''" />
+                <input type="hidden" name="notify_job_applications" value="0">
+                <label class="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
+                    <input type="checkbox" name="notify_job_applications" value="1" @checked(in_array(strtolower((string)($notifications['notify_job_applications'] ?? '0')), ['1','true','yes','on'], true)) class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                    Email job applications
+                </label>
+                <input type="hidden" name="notify_auto_reply" value="0">
+                <label class="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
+                    <input type="checkbox" name="notify_auto_reply" value="1" @checked(in_array(strtolower((string)($notifications['notify_auto_reply'] ?? '0')), ['1','true','yes','on'], true)) class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                    Send contact form auto-reply
+                </label>
+                <x-form.input name="notify_auto_reply_subject" label="Auto-reply subject" :value="$notifications['notify_auto_reply_subject'] ?? ''" />
+                <x-form.textarea name="notify_auto_reply_body" label="Auto-reply body" :value="$notifications['notify_auto_reply_body'] ?? ''" rows="4" />
+            </div>
+        </x-card>
+    </div>
+
+    <!-- COOKIE -->
+    <div x-show="tab==='cookie'" x-cloak class="max-w-2xl">
+        <x-card title="Cookie banner">
+            <div class="space-y-4">
+                <input type="hidden" name="cookie_enabled" value="0">
+                <label class="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
+                    <input type="checkbox" name="cookie_enabled" value="1" @checked(in_array(strtolower((string)($cookie['cookie_enabled'] ?? '0')), ['1','true','yes','on'], true)) class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                    Show cookie banner
+                </label>
+                <x-form.textarea name="cookie_message" label="Message" :value="$cookie['cookie_message'] ?? ''" rows="3" />
+                <x-form.input name="cookie_policy_url" label="Policy URL" :value="$cookie['cookie_policy_url'] ?? ''" />
             </div>
         </x-card>
     </div>

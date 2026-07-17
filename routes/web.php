@@ -7,6 +7,7 @@ use App\Http\Controllers\Site\FormController;
 use App\Http\Controllers\Site\HomeController;
 use App\Http\Controllers\Site\JobController;
 use App\Http\Controllers\Site\PageController;
+use App\Http\Controllers\Site\SeoController;
 use App\Http\Controllers\Site\ServiceController;
 use Illuminate\Support\Facades\Route;
 
@@ -32,6 +33,9 @@ Route::post('/contact', [ContactController::class, 'submit'])->name('contact.sub
 
 Route::get('/forms/{slug}', [FormController::class, 'show'])->name('forms.show');
 Route::post('/forms/{slug}', [FormController::class, 'submit'])->name('forms.submit');
+
+Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
+Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
 
 // Dynamic DB pages — keep last so it doesn't shadow named routes.
 Route::get('/{slug}', [PageController::class, 'show'])->where('slug', '^(?!admin$|admin/).*')->name('page.show');

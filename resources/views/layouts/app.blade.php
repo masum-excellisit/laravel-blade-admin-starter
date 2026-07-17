@@ -4,9 +4,13 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', $settings['site_name'] ?? config('app.name'))</title>
+    @hasSection('meta_description')
     <meta name="description" content="@yield('meta_description', $settings['site_tagline'] ?? '')">
+    @endif
+    @stack('meta')
     @include('partials.theme')
     @include('partials.assets')
+    @include('partials.analytics')
 </head>
 <body class="antialiased bg-white text-slate-800">
 <header x-data="{ open:false }" class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-slate-100">
@@ -47,6 +51,7 @@
     <div class="border-t border-white/10 py-5 text-center text-xs text-slate-500">&copy; {{ date('Y') }} {{ $settings['site_name'] ?? config('app.name') }}. All rights reserved.</div>
 </footer>
 <x-flash />
+@include('partials.cookie-banner')
 @include('partials.assets-scripts')
 </body>
 </html>

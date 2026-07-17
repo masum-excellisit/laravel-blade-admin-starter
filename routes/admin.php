@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\RedirectController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\SettingController;
@@ -123,6 +124,11 @@ Route::middleware('auth')->group(function () {
         Route::get('messages', [MessageController::class, 'index'])->name('messages.index');
         Route::get('messages/{message}', [MessageController::class, 'show'])->name('messages.show');
         Route::delete('messages/{message}', [MessageController::class, 'destroy'])->name('messages.destroy');
+    });
+
+    Route::middleware('permission:redirects.view')->group(function () {
+        Route::post('redirects/bulk', [RedirectController::class, 'bulk'])->name('redirects.bulk');
+        Route::resource('redirects', RedirectController::class)->except('show');
     });
 
     Route::middleware('permission:blocks.view')->group(function () {

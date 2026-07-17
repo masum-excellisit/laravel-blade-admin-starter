@@ -8,8 +8,13 @@ use App\Models\ContentBlock;
 use App\Models\Form;
 use App\Models\FormField;
 use App\Models\FormSubmission;
+use App\Models\JobListing;
 use App\Models\Page;
 use App\Models\PortfolioItem;
+use App\Models\Post;
+use App\Models\Redirect;
+use App\Models\Service;
+use App\Models\Setting;
 use App\Models\User;
 use App\Support\Activity;
 use Database\Seeders\RolePermissionSeeder;
@@ -221,6 +226,63 @@ class CmsPlatformFeaturesTest extends TestCase
         $this->assertDatabaseHas('settings', ['group' => 'cookie', 'key' => 'cookie_enabled', 'value' => '1']);
         $this->assertDatabaseHas('settings', ['group' => 'notifications', 'key' => 'notify_contact_email', 'value' => 'hello@example.com']);
         $this->assertDatabaseHas('settings', ['group' => 'notifications', 'key' => 'notify_job_applications', 'value' => '1']);
+    }
+
+    public function test_active_redirect_matches_request_path_and_counts_hit(): void
+    {
+        $redirect = Redirect::create([
+            'from_path' => '/legacy-page',
+            'to_url' => '/fresh-page',
+            'status_code' => 302,
+            'is_active' => true,
+            'hits' => 0,
+        ]);
+
+        $response = $this->get('/legacy-page');
+
+        $response->assertRedirect('/fresh-page');
+        $response->assertStatus(302);
+        $this->assertSame(1, $redirect->fresh()->hits);
+    }
+
+    public function test_sitemap_returns_published_content(): void
+    {
+        Page::create(['title' => 'About', 'slug' => 'about-us', 'status' => 'published']);
+        Post::create(['title' => 'Launch', 'slug' => 'launch', 'status' => 'published', 'published_at' => now()->subDay()]);
+        Service::create(['title' => 'Consulting', 'slug' => 'consulting', 'status' => 'published']);
+        JobListing::create(['title' => 'Designer', 'slug' => 'designer', 'status' => 'published', 'published_at' => now()->subDay()]);
+        PortfolioItem::create(['title' => 'Case Study', 'slug' => 'case-study', 'status' => 'published', 'published_at' => now()->subDay()]);
+
+        $response = $this->get('/sitemap.xml');
+
+        $response->assertOk();
+        $response->assertSee(url('/about-us'), false);
+        $response->assertSee(route('blog.show', 'launch'), false);
+        $response->assertSee(route('services.show', 'consulting'), false);
+        $response->assertSee(route('jobs.show', 'designer'), false);
+        $response->assertSee(url('/portfolio/case-study'), false);
+    }
+
+    public function test_robots_txt_allows_site_and_points_to_sitemap(): void
+    {
+        $response = $this->get('/robots.txt');
+
+        $response->assertOk();
+        $response->assertSee('Allow: /');
+        $response->assertSee('Sitemap: '.url('/sitemap.xml'));
+    }
+
+    public function test_maintenance_mode_shows_for_guests_when_enabled(): void
+    {
+        Setting::put('maintenance_enabled', '1', 'maintenance', 'boolean');
+        Setting::put('maintenance_headline', 'Scheduled maintenance', 'maintenance');
+        Setting::put('maintenance_message', 'Please check back soon.', 'maintenance', 'textarea');
+
+        $response = $this->get('/');
+
+        $response->assertStatus(503);
+        $response->assertSee('Scheduled maintenance');
+        $response->assertSee('Please check back soon.');
     }
 }
 
