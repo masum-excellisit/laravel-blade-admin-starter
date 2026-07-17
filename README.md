@@ -16,15 +16,24 @@ A reusable **Laravel 12** website + custom **Blade admin panel** starter kit. Cl
 
 - 🔐 Custom login, password reset, rate limiting, disabled-account guard
 - 👥 Two user types from one `users` table — **Admin Users** (staff with panel access & roles) and **Users** (customers/front-end accounts, blocked from the admin panel)
+- 🧑‍💼 **Customer account portal** — public register/login/profile at `/account/*`
 - 🛡️ Roles (permission matrix) + Permissions — multi-admin with granular access
 - 🧱 **CMS Management** for fixed pages (Home, About, Services, How It Works, Careers, Contact) with sectioned text/image fields
-- 🧩 Modules: **Services**, **Testimonials**, **Jobs**, **Job Applications**
+- 🧩 Modules: **Services**, **Testimonials**, **Jobs**, **Job Applications**, **FAQs**, **Team**, **Portfolio**
 - 📝 Pages & Blog (categories, featured images, scheduling) with Jodit
+- 🔎 **SEO toolkit** — meta/OG/canonical fields, `sitemap.xml`, `robots.txt`, editor checklist
+- ↪️ **Redirect manager** — 301/302 rules with hit counting
+- 🧱 **Global content blocks** + **Form builder** (fields + submissions inbox, public `/forms/{slug}`)
+- 🕘 **Content revisions** for pages/posts/CMS + restore
+- 📜 **Activity / audit log** of admin changes
 - 🧭 Header/footer **Menus** with drag-and-drop item ordering
-- 🔍 Admin tables: search, click-to-sort columns, multi-select bulk actions
-- 🖼️ Media library (+ Jodit upload endpoint, auto-resize)
-- ✉️ Contact form → stored messages
-- ⚙️ Settings: General, **Mail** (DB-driven SMTP + test email), **Theme** (gradient colours drive both admin & public site)
+- 🔍 Admin tables: live search, click-to-sort columns, multi-select bulk actions
+- 🖼️ Media library (folders, alt text, tags, replace-in-place, unused cleanup, Jodit upload, auto-resize)
+- ✉️ Contact form → stored messages + **email notifications** / optional auto-reply
+- 🍪 Cookie consent banner + **Analytics** snippets (GA4 / GTM / Plausible) from Settings
+- 🚧 **Maintenance / coming soon** mode from Settings
+- 💾 **Backup / export** of content (+ media when small)
+- ⚙️ Settings: General, Theme, Mail, Analytics, Maintenance, Notifications, Cookie
 - 🎨 Fully themeable via CSS variables — reskin per client without touching code
 - ⚡ `php artisan make:admin-module {Name}` scaffolds a complete CRUD module (injected **before Settings**)
 - 📱 Responsive: sidebar drawer, responsive tables/forms, light/dark mode

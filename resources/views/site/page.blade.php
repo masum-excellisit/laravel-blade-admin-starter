@@ -1,6 +1,13 @@
 @extends('layouts.app')
 @section('title', $page->meta_title ?: $page->title)
-@section('meta_description', $page->meta_description)
+@push('meta')
+<x-seo-meta
+    :title="$page->meta_title ?: $page->title"
+    :description="$page->meta_description"
+    :og-image="$page->og_image"
+    :canonical="$page->canonical_url ?: url('/'.$page->slug)"
+/>
+@endpush
 @section('content')
 <div class="brand-gradient text-white">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 py-20 text-center">

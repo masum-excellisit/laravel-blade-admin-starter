@@ -9,7 +9,7 @@ class Media extends Model
 {
     protected $table = 'media';
 
-    protected $fillable = ['name', 'path', 'disk', 'mime', 'size', 'user_id'];
+    protected $fillable = ['name', 'folder', 'alt_text', 'tags', 'path', 'disk', 'mime', 'size', 'user_id'];
 
     public function getUrlAttribute(): string
     {

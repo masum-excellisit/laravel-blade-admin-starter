@@ -22,5 +22,14 @@
             <x-form.image name="featured_image" rounded="rounded-xl"
                 :current="$post->featured_image ? \Illuminate\Support\Facades\Storage::disk('public')->url($post->featured_image) : ''" />
         </x-card>
+        @if($post->exists)
+            @include('admin.revisions._list', [
+                'revisions' => $revisions ?? collect(),
+                'restoreRouteName' => 'admin.posts.revisions.restore',
+                'model' => $post,
+                'permission' => 'posts.edit',
+            ])
+        @endif
+        <x-seo-fields :model="$post" />
     </div>
 </div>

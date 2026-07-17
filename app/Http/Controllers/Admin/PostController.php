@@ -8,6 +8,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\PostRequest;
 use App\Models\Category;
 use App\Models\Post;
+use App\Models\Revision;
+use App\Support\Activity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -51,27 +53,40 @@ class PostController extends Controller
         if ($request->hasFile('featured_image')) {
             $data['featured_image'] = $request->file('featured_image')->store('posts', 'public');
         }
-        Post::create($data);
+        $post = Post::create($data);
+
+        Activity::log('created', $post, 'Post created');
 
         return redirect()->route('admin.posts.index')->with('success', 'Post created.');
     }
 
     public function edit(Post $post)
     {
-        return view('admin.posts.edit', ['post' => $post, 'categories' => Category::pluck('name', 'id')]);
+        return view('admin.posts.edit', [
+            'post' => $post,
+            'categories' => Category::pluck('name', 'id'),
+            'revisions' => $post->revisions()->with('user')->latest()->limit(5)->get(),
+        ]);
     }
 
     public function update(PostRequest $request, Post $post)
     {
         abort_unless($request->user()->can('posts.edit'), 403);
         $data = $request->validated();
+        $oldImage = $post->featured_image;
         if ($request->hasFile('featured_image')) {
-            if ($post->featured_image) {
-                Storage::disk('public')->delete($post->featured_image);
-            }
             $data['featured_image'] = $request->file('featured_image')->store('posts', 'public');
         }
-        $post->update($data);
+        $post->fill($data);
+
+        if ($post->isDirty()) {
+            $post->recordRevision('before update');
+            $post->save();
+            if (($data['featured_image'] ?? null) && $oldImage) {
+                Storage::disk('public')->delete($oldImage);
+            }
+            Activity::log('updated', $post, 'Post updated');
+        }
 
         return redirect()->route('admin.posts.index')->with('success', 'Post updated.');
     }
@@ -79,8 +94,23 @@ class PostController extends Controller
     public function destroy(Request $request, Post $post)
     {
         abort_unless($request->user()->can('posts.delete'), 403);
+        Activity::log('deleted', $post, 'Post deleted', ['title' => $post->title]);
         $post->delete();
 
         return back()->with('success', 'Post deleted.');
+    }
+
+    public function restoreRevision(Request $request, Post $post, Revision $revision)
+    {
+        abort_unless($request->user()->can('posts.edit'), 403);
+        abort_unless($revision->revisionable_type === $post->getMorphClass()
+            && (int) $revision->revisionable_id === (int) $post->id, 404);
+
+        $post->restoreRevision($revision);
+        Activity::log('restored', $post, 'Post revision restored', [
+            'revision_id' => $revision->id,
+        ]);
+
+        return redirect()->route('admin.posts.edit', $post)->with('success', 'Post revision restored.');
     }
 }

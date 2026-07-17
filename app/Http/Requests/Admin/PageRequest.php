@@ -23,6 +23,8 @@ class PageRequest extends FormRequest
             'body' => ['nullable', 'string'],
             'meta_title' => ['nullable', 'string', 'max:255'],
             'meta_description' => ['nullable', 'string', 'max:500'],
+            'og_image' => ['nullable', 'string', 'max:255'],
+            'canonical_url' => ['nullable', 'url', 'max:255'],
             'template' => ['required', 'string'],
             'status' => ['required', 'in:draft,published'],
         ];

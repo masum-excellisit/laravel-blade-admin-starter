@@ -24,6 +24,10 @@ class PostRequest extends FormRequest
             'body' => ['nullable', 'string'],
             'category_id' => ['nullable', 'exists:categories,id'],
             'featured_image' => ['nullable', 'image', 'max:4096'],
+            'meta_title' => ['nullable', 'string', 'max:255'],
+            'meta_description' => ['nullable', 'string', 'max:500'],
+            'og_image' => ['nullable', 'string', 'max:255'],
+            'canonical_url' => ['nullable', 'url', 'max:255'],
             'status' => ['required', 'in:draft,published'],
             'published_at' => ['nullable', 'date'],
         ];

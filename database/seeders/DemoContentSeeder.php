@@ -4,12 +4,15 @@ namespace Database\Seeders;
 
 use App\Models\Category;
 use App\Models\CmsContent;
+use App\Models\Faq;
 use App\Models\JobListing;
 use App\Models\Menu;
 use App\Models\MenuItem;
 use App\Models\Page;
+use App\Models\PortfolioItem;
 use App\Models\Post;
 use App\Models\Service;
+use App\Models\TeamMember;
 use App\Models\Testimonial;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -140,6 +143,48 @@ class DemoContentSeeder extends Seeder
                 'body' => '<p>'.$excerpt.' Edit this service from the admin panel.</p>',
                 'sort_order' => $i,
                 'status' => 'published',
+            ]);
+        }
+
+        foreach ([
+            ['How quickly can we launch?', 'Most starter projects can be configured and launched in a few weeks.', 'Getting started'],
+            ['Can editors manage content?', 'Yes. The admin panel includes pages, posts, services, menus, and role-based access.', 'Content'],
+            ['Do you support custom modules?', 'Yes. We can extend the starter with modules that match your workflow.', 'Platform'],
+        ] as $i => [$question, $answer, $category]) {
+            Faq::firstOrCreate(['question' => $question], [
+                'answer' => $answer,
+                'category' => $category,
+                'sort_order' => $i,
+                'status' => 'published',
+            ]);
+        }
+
+        foreach ([
+            ['Avery Brooks', 'Founder', 'Leads strategy and client partnerships.'],
+            ['Priya Shah', 'Product Designer', 'Designs polished public sites and admin workflows.'],
+            ['Marco Alvarez', 'Laravel Engineer', 'Builds robust CMS and platform features.'],
+        ] as $i => [$name, $roleTitle, $bio]) {
+            TeamMember::firstOrCreate(['name' => $name], [
+                'role_title' => $roleTitle,
+                'bio' => $bio,
+                'sort_order' => $i,
+                'status' => 'published',
+            ]);
+        }
+
+        foreach ([
+            ['Northwind Launch', 'Northwind', 'A marketing site and admin panel for a growing product team.'],
+            ['Acme Careers Portal', 'Acme', 'A careers experience with job listings and applications.'],
+            ['Atlas Content Hub', 'Atlas', 'A flexible CMS foundation for publishing teams.'],
+        ] as $i => [$title, $client, $excerpt]) {
+            PortfolioItem::firstOrCreate(['slug' => Str::slug($title)], [
+                'title' => $title,
+                'client' => $client,
+                'excerpt' => $excerpt,
+                'body' => $excerpt.' Built with the Laravel Blade admin starter.',
+                'sort_order' => $i,
+                'status' => 'published',
+                'published_at' => now()->subDays($i + 1),
             ]);
         }
 

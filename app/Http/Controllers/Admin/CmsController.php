@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\CmsContent;
+use App\Models\Revision;
+use App\Support\Activity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -54,6 +56,7 @@ class CmsController extends Controller
 
         $rules = $this->buildValidationRules($pageConfig['sections']);
         $validated = $request->validate($rules);
+        $changed = false;
 
         foreach ($pageConfig['sections'] as $sectionKey => $sectionConfig) {
             $sectionInput = $validated['sections'][$sectionKey] ?? [];
@@ -86,6 +89,13 @@ class CmsController extends Controller
                 }
             }
 
+            if ($existing && $existing->data !== $sectionData) {
+                $existing->recordRevision('before update');
+                $changed = true;
+            } elseif (! $existing) {
+                $changed = true;
+            }
+
             CmsContent::updateOrCreate(
                 ['page' => $page, 'section' => $sectionKey],
                 ['data' => $sectionData],
@@ -94,9 +104,31 @@ class CmsController extends Controller
 
         CmsContent::forgetPageCache($page);
 
+        if ($changed) {
+            Activity::log('updated', null, 'CMS page content updated', ['page' => $page]);
+        }
+
         return redirect()
             ->route('admin.cms.edit', $page)
             ->with('success', 'Page content updated.');
+    }
+
+    public function restoreRevision(Request $request, string $page, Revision $revision)
+    {
+        abort_unless($request->user()->can('cms.edit'), 403);
+
+        $content = $revision->revisionable;
+        abort_unless($content instanceof CmsContent && $content->page === $page, 404);
+
+        $content->restoreRevision($revision);
+        CmsContent::forgetPageCache($page);
+        Activity::log('restored', $content, 'CMS content revision restored', [
+            'page' => $page,
+            'section' => $content->section,
+            'revision_id' => $revision->id,
+        ]);
+
+        return redirect()->route('admin.cms.edit', $page)->with('success', 'CMS revision restored.');
     }
 
     /**

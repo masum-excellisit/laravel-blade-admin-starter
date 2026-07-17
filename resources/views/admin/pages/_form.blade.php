@@ -16,11 +16,14 @@
                 <x-btn type="submit" class="w-full">{{ $page->exists ? 'Update page' : 'Create page' }}</x-btn>
             </div>
         </x-card>
-        <x-card title="SEO">
-            <div class="space-y-4">
-                <x-form.input name="meta_title" label="Meta title" :value="$page->meta_title" />
-                <x-form.textarea name="meta_description" label="Meta description" :value="$page->meta_description" rows="3" />
-            </div>
-        </x-card>
+        @if($page->exists)
+            @include('admin.revisions._list', [
+                'revisions' => $revisions ?? collect(),
+                'restoreRouteName' => 'admin.pages.revisions.restore',
+                'model' => $page,
+                'permission' => 'pages.edit',
+            ])
+        @endif
+        <x-seo-fields :model="$page" />
     </div>
 </div>

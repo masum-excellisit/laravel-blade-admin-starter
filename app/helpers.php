@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\CmsContent;
+use App\Models\ContentBlock;
+use Illuminate\Support\Facades\Storage;
 
 if (! function_exists('cms')) {
     /**
@@ -24,6 +26,16 @@ if (! function_exists('cms_image')) {
             return $default;
         }
 
-        return \Illuminate\Support\Facades\Storage::disk('public')->url($path);
+        return Storage::disk('public')->url($path);
+    }
+}
+
+if (! function_exists('block')) {
+    function block(string $key): ?string
+    {
+        return ContentBlock::query()
+            ->where('key', $key)
+            ->where('is_active', true)
+            ->value('content');
     }
 }

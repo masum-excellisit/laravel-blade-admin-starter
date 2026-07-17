@@ -1,0 +1,372 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Mail\ContactAutoReply;
+use App\Mail\ContactMessageNotification;
+use App\Models\ActivityLog;
+use App\Models\Concerns\HasRevisions;
+use App\Models\ContentBlock;
+use App\Models\Form;
+use App\Models\FormField;
+use App\Models\FormSubmission;
+use App\Models\JobListing;
+use App\Models\Page;
+use App\Models\PortfolioItem;
+use App\Models\Post;
+use App\Models\Redirect;
+use App\Models\Service;
+use App\Models\Setting;
+use App\Models\User;
+use App\Support\Activity;
+use Database\Seeders\RolePermissionSeeder;
+use Database\Seeders\SettingsSeeder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
+use Spatie\Permission\Models\Role;
+use Tests\TestCase;
+
+class CmsPlatformFeaturesTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_public_form_submission_stores_field_payload(): void
+    {
+        $form = Form::create([
+            'name' => 'Contact Quote',
+            'slug' => 'contact-quote',
+            'success_message' => 'Thanks for reaching out.',
+            'is_active' => true,
+        ]);
+
+        FormField::create([
+            'form_id' => $form->id,
+            'label' => 'Name',
+            'name' => 'name',
+            'type' => 'text',
+            'required' => true,
+            'sort_order' => 10,
+        ]);
+
+        FormField::create([
+            'form_id' => $form->id,
+            'label' => 'Budget',
+            'name' => 'budget',
+            'type' => 'select',
+            'options' => ['under-5k', 'over-5k'],
+            'required' => true,
+            'sort_order' => 20,
+        ]);
+
+        $this->post(route('forms.submit', $form->slug), [
+            'name' => 'Ada Lovelace',
+            'budget' => 'over-5k',
+        ])
+            ->assertRedirect()
+            ->assertSessionHas('success', 'Thanks for reaching out.');
+
+        $submission = FormSubmission::firstOrFail();
+
+        $this->assertTrue($submission->form->is($form));
+        $this->assertSame([
+            'name' => 'Ada Lovelace',
+            'budget' => 'over-5k',
+        ], $submission->data);
+    }
+
+    public function test_forms_order_fields_and_cast_structured_payloads(): void
+    {
+        $form = Form::create([
+            'name' => 'Contact',
+            'slug' => 'contact',
+            'success_message' => 'Thanks',
+            'is_active' => true,
+        ]);
+
+        FormField::create([
+            'form_id' => $form->id,
+            'label' => 'Last',
+            'name' => 'last',
+            'options' => ['b'],
+            'sort_order' => 20,
+        ]);
+        FormField::create([
+            'form_id' => $form->id,
+            'label' => 'First',
+            'name' => 'first',
+            'options' => ['a'],
+            'required' => true,
+            'sort_order' => 10,
+        ]);
+        $submission = $form->submissions()->create([
+            'data' => ['first' => 'Ada'],
+            'ip_address' => '203.0.113.5',
+        ]);
+
+        $this->assertInstanceOf(HasMany::class, $form->fields());
+        $this->assertSame(['first', 'last'], $form->fields()->pluck('name')->all());
+        $this->assertSame(['a'], $form->fields()->first()->options);
+        $this->assertTrue($form->fields()->first()->required);
+        $this->assertSame(['first' => 'Ada'], $submission->fresh()->data);
+    }
+
+    public function test_activity_log_records_current_user_request_and_subject(): void
+    {
+        $user = User::create([
+            'name' => 'Editor',
+            'email' => 'editor@example.com',
+            'password' => 'password',
+        ]);
+        $page = Page::create([
+            'title' => 'About',
+            'slug' => 'about',
+            'status' => 'draft',
+        ]);
+
+        $this->actingAs($user);
+        request()->server->set('REMOTE_ADDR', '203.0.113.10');
+
+        Activity::log('updated', $page, 'Updated page copy', ['field' => 'body']);
+
+        $log = ActivityLog::firstOrFail();
+
+        $this->assertInstanceOf(BelongsTo::class, $log->user());
+        $this->assertInstanceOf(MorphTo::class, $log->subject());
+        $this->assertTrue($log->user->is($user));
+        $this->assertTrue($log->subject->is($page));
+        $this->assertSame('203.0.113.10', $log->ip_address);
+        $this->assertSame(['field' => 'body'], $log->properties);
+    }
+
+    public function test_revisions_capture_and_restore_model_attributes(): void
+    {
+        $user = User::create([
+            'name' => 'Editor',
+            'email' => 'revision-editor@example.com',
+            'password' => 'password',
+        ]);
+        $page = RevisionablePage::create([
+            'title' => 'Original',
+            'slug' => 'original',
+            'body' => 'Before',
+            'status' => 'draft',
+        ]);
+
+        $this->actingAs($user);
+        $revision = $page->recordRevision('before edit');
+
+        $page->forceFill(['title' => 'Changed', 'body' => 'After'])->save();
+        $page->restoreRevision($revision);
+
+        $this->assertInstanceOf(MorphMany::class, $page->revisions());
+        $this->assertInstanceOf(MorphTo::class, $revision->revisionable());
+        $this->assertInstanceOf(BelongsTo::class, $revision->user());
+        $this->assertSame($user->id, $revision->user_id);
+        $this->assertSame('Original', $page->fresh()->title);
+        $this->assertSame('Before', $page->fresh()->body);
+    }
+
+    public function test_content_blocks_helper_and_portfolio_scope(): void
+    {
+        ContentBlock::create([
+            'name' => 'Hero',
+            'key' => 'hero',
+            'content' => 'Hero copy',
+            'is_active' => true,
+        ]);
+        ContentBlock::create([
+            'name' => 'Draft',
+            'key' => 'draft',
+            'content' => 'Draft copy',
+            'is_active' => false,
+        ]);
+
+        PortfolioItem::create([
+            'title' => 'Draft project',
+            'slug' => 'draft-project',
+            'status' => 'draft',
+        ]);
+        PortfolioItem::create([
+            'title' => 'Future project',
+            'slug' => 'future-project',
+            'status' => 'published',
+            'published_at' => now()->addDay(),
+        ]);
+        PortfolioItem::create([
+            'title' => 'Live project',
+            'slug' => 'live-project',
+            'status' => 'published',
+            'published_at' => now()->subDay(),
+        ]);
+
+        $this->assertSame('Hero copy', block('hero'));
+        $this->assertNull(block('draft'));
+        $this->assertSame(['Live project'], PortfolioItem::published()->pluck('title')->all());
+    }
+
+    public function test_seeders_include_cms_platform_defaults_and_editor_permissions(): void
+    {
+        $this->seed(RolePermissionSeeder::class);
+        $this->seed(SettingsSeeder::class);
+
+        $editor = Role::findByName('editor');
+
+        $this->assertTrue($editor->hasPermissionTo('faqs.create'));
+        $this->assertTrue($editor->hasPermissionTo('team.delete'));
+        $this->assertTrue($editor->hasPermissionTo('portfolio.edit'));
+        $this->assertTrue($editor->hasPermissionTo('blocks.edit'));
+        $this->assertTrue($editor->hasPermissionTo('forms.view'));
+        $this->assertTrue($editor->hasPermissionTo('redirects.view'));
+        $this->assertTrue($editor->hasPermissionTo('activity-logs.view'));
+        $this->assertFalse($editor->hasPermissionTo('forms.create'));
+
+        $this->assertDatabaseHas('settings', ['group' => 'analytics', 'key' => 'analytics_ga4_id', 'value' => '']);
+        $this->assertDatabaseHas('settings', ['group' => 'maintenance', 'key' => 'maintenance_enabled', 'value' => '0']);
+        $this->assertDatabaseHas('settings', ['group' => 'cookie', 'key' => 'cookie_enabled', 'value' => '1']);
+        $this->assertDatabaseHas('settings', ['group' => 'notifications', 'key' => 'notify_contact_email', 'value' => 'hello@example.com']);
+        $this->assertDatabaseHas('settings', ['group' => 'notifications', 'key' => 'notify_job_applications', 'value' => '1']);
+    }
+
+    public function test_active_redirect_matches_request_path_and_counts_hit(): void
+    {
+        $redirect = Redirect::create([
+            'from_path' => '/legacy-page',
+            'to_url' => '/fresh-page',
+            'status_code' => 302,
+            'is_active' => true,
+            'hits' => 0,
+        ]);
+
+        $response = $this->get('/legacy-page');
+
+        $response->assertRedirect('/fresh-page');
+        $response->assertStatus(302);
+        $this->assertSame(1, $redirect->fresh()->hits);
+    }
+
+    public function test_sitemap_returns_published_content(): void
+    {
+        Page::create(['title' => 'About', 'slug' => 'about-us', 'status' => 'published']);
+        Post::create(['title' => 'Launch', 'slug' => 'launch', 'status' => 'published', 'published_at' => now()->subDay()]);
+        Service::create(['title' => 'Consulting', 'slug' => 'consulting', 'status' => 'published']);
+        JobListing::create(['title' => 'Designer', 'slug' => 'designer', 'status' => 'published', 'published_at' => now()->subDay()]);
+        PortfolioItem::create(['title' => 'Case Study', 'slug' => 'case-study', 'status' => 'published', 'published_at' => now()->subDay()]);
+
+        $response = $this->get('/sitemap.xml');
+
+        $response->assertOk();
+        $response->assertSee(url('/about-us'), false);
+        $response->assertSee(route('blog.show', 'launch'), false);
+        $response->assertSee(route('services.show', 'consulting'), false);
+        $response->assertSee(route('jobs.show', 'designer'), false);
+        $response->assertSee(url('/portfolio/case-study'), false);
+    }
+
+    public function test_robots_txt_allows_site_and_points_to_sitemap(): void
+    {
+        $response = $this->get('/robots.txt');
+
+        $response->assertOk();
+        $response->assertSee('Allow: /');
+        $response->assertSee('Sitemap: '.url('/sitemap.xml'));
+    }
+
+    public function test_maintenance_mode_shows_for_guests_when_enabled(): void
+    {
+        Setting::put('maintenance_enabled', '1', 'maintenance', 'boolean');
+        Setting::put('maintenance_headline', 'Scheduled maintenance', 'maintenance');
+        Setting::put('maintenance_message', 'Please check back soon.', 'maintenance', 'textarea');
+
+        $response = $this->get('/');
+
+        $response->assertStatus(503);
+        $response->assertSee('Scheduled maintenance');
+        $response->assertSee('Please check back soon.');
+    }
+
+    public function test_contact_submit_sends_notification_and_auto_reply(): void
+    {
+        Mail::fake();
+
+        Setting::put('notify_contact_email', 'notify@example.com', 'notifications');
+        Setting::put('contact_email', 'fallback@example.com', 'general');
+        Setting::put('notify_auto_reply', '1', 'notifications', 'boolean');
+        Setting::put('notify_auto_reply_subject', 'Thanks for writing', 'notifications');
+        Setting::put('notify_auto_reply_body', 'We will reply soon.', 'notifications', 'textarea');
+
+        $this->post(route('contact.submit'), [
+            'name' => 'Ada Lovelace',
+            'email' => 'ada@example.com',
+            'subject' => 'Project question',
+            'message' => 'Can we work together?',
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('contact_messages', [
+            'email' => 'ada@example.com',
+            'subject' => 'Project question',
+        ]);
+
+        Mail::assertSent(ContactMessageNotification::class, function (ContactMessageNotification $mail) {
+            return $mail->hasTo('notify@example.com')
+                && str_contains($mail->messageModel->message, 'Can we work together?');
+        });
+
+        Mail::assertSent(ContactAutoReply::class, function (ContactAutoReply $mail) {
+            return $mail->hasTo('ada@example.com')
+                && $mail->subjectLine === 'Thanks for writing';
+        });
+    }
+
+    public function test_activity_log_index_renders_for_admin(): void
+    {
+        $this->seed();
+        ActivityLog::create([
+            'action' => 'updated',
+            'description' => 'Updated page copy',
+            'ip_address' => '203.0.113.10',
+        ]);
+
+        $admin = User::where('email', 'superadmin@yopmail.com')->firstOrFail();
+
+        $this->actingAs($admin)
+            ->get(route('admin.activity-logs.index', ['search' => 'page', 'sort' => 'action', 'direction' => 'asc']))
+            ->assertOk()
+            ->assertSee('Activity Log')
+            ->assertSee('Updated page copy');
+    }
+
+    public function test_page_revision_restore_route_restores_previous_state(): void
+    {
+        $this->seed();
+        $admin = User::where('email', 'superadmin@yopmail.com')->firstOrFail();
+
+        $page = Page::create([
+            'title' => 'Original title',
+            'slug' => 'original-title',
+            'body' => 'Original body',
+            'status' => 'draft',
+            'template' => 'default',
+        ]);
+
+        $this->actingAs($admin);
+        $revision = $page->recordRevision('before update');
+        $page->update(['title' => 'Changed title', 'body' => 'Changed body']);
+
+        $this->post(route('admin.pages.revisions.restore', [$page, $revision]))
+            ->assertRedirect(route('admin.pages.edit', $page));
+
+        $this->assertSame('Original title', $page->fresh()->title);
+        $this->assertSame('Original body', $page->fresh()->body);
+    }
+}
+
+class RevisionablePage extends Page
+{
+    use HasRevisions;
+
+    protected $table = 'pages';
+}

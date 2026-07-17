@@ -3,9 +3,14 @@
 namespace App\Http\Controllers\Site;
 
 use App\Http\Controllers\Controller;
+use App\Mail\JobApplicationNotification;
 use App\Models\JobApplication;
 use App\Models\JobListing;
+use App\Models\Setting;
+use App\Support\Activity;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use Throwable;
 
 class JobController extends Controller
 {
@@ -40,7 +45,7 @@ class JobController extends Controller
             $path = $request->file('resume')->store('resumes', 'public');
         }
 
-        JobApplication::create([
+        $application = JobApplication::create([
             'job_listing_id' => $job->id,
             'name' => $data['name'],
             'email' => $data['email'],
@@ -50,6 +55,38 @@ class JobController extends Controller
             'status' => 'new',
         ]);
 
+        Activity::log('created', $application, 'Job application submitted', [
+            'job' => $job->title,
+            'email' => $application->email,
+        ]);
+
+        $this->sendApplicationNotification($application);
+
         return back()->with('success', 'Application submitted. Thank you!');
+    }
+
+    private function sendApplicationNotification(JobApplication $application): void
+    {
+        if (! $this->settingEnabled(Setting::get('notify_job_applications', '0'))) {
+            return;
+        }
+
+        $recipient = trim((string) (Setting::get('notify_contact_email') ?: Setting::get('contact_email')));
+        if ($recipient === '') {
+            return;
+        }
+
+        try {
+            Mail::to($recipient)->send(new JobApplicationNotification($application));
+        } catch (Throwable $e) {
+            Activity::log('mail_failed', $application, 'Job application notification email failed', [
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    private function settingEnabled(mixed $value): bool
+    {
+        return in_array(strtolower((string) $value), ['1', 'true', 'yes', 'on'], true);
     }
 }

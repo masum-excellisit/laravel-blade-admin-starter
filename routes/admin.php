@@ -2,10 +2,15 @@
 
 use App\Http\Controllers\Admin\Auth\LoginController;
 use App\Http\Controllers\Admin\Auth\PasswordResetController;
+use App\Http\Controllers\Admin\ActivityLogController;
+use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CmsController;
+use App\Http\Controllers\Admin\ContentBlockController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\FaqController;
+use App\Http\Controllers\Admin\FormController;
 use App\Http\Controllers\Admin\JobApplicationController;
 use App\Http\Controllers\Admin\JobListingController;
 use App\Http\Controllers\Admin\MediaController;
@@ -13,11 +18,14 @@ use App\Http\Controllers\Admin\MenuController;
 use App\Http\Controllers\Admin\MessageController;
 use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\PermissionController;
+use App\Http\Controllers\Admin\PortfolioController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\RedirectController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\TeamMemberController;
 use App\Http\Controllers\Admin\TestimonialController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
@@ -63,6 +71,7 @@ Route::middleware('auth')->group(function () {
         Route::get('cms', [CmsController::class, 'index'])->name('cms.index');
         Route::get('cms/{page}', [CmsController::class, 'edit'])->name('cms.edit');
         Route::put('cms/{page}', [CmsController::class, 'update'])->name('cms.update');
+        Route::post('cms/{page}/revisions/{revision}/restore', [CmsController::class, 'restoreRevision'])->name('cms.revisions.restore');
     });
 
     Route::middleware('permission:services.view')->group(function () {
@@ -92,10 +101,12 @@ Route::middleware('auth')->group(function () {
     Route::middleware('permission:pages.view')->group(function () {
         Route::post('pages/bulk', [PageController::class, 'bulk'])->name('pages.bulk');
         Route::resource('pages', PageController::class)->except('show');
+        Route::post('pages/{page}/revisions/{revision}/restore', [PageController::class, 'restoreRevision'])->name('pages.revisions.restore');
     });
     Route::middleware('permission:posts.view')->group(function () {
         Route::post('posts/bulk', [PostController::class, 'bulk'])->name('posts.bulk');
         Route::resource('posts', PostController::class)->except('show');
+        Route::post('posts/{post}/revisions/{revision}/restore', [PostController::class, 'restoreRevision'])->name('posts.revisions.restore');
     });
     Route::middleware('permission:categories.view')->group(function () {
         Route::post('categories/bulk', [CategoryController::class, 'bulk'])->name('categories.bulk');
@@ -110,8 +121,11 @@ Route::middleware('auth')->group(function () {
     });
     Route::middleware('permission:media.view')->group(function () {
         Route::post('media/bulk', [MediaController::class, 'bulk'])->name('media.bulk');
+        Route::post('media/cleanup', [MediaController::class, 'cleanup'])->name('media.cleanup');
         Route::get('media', [MediaController::class, 'index'])->name('media.index');
         Route::post('media', [MediaController::class, 'store'])->name('media.store');
+        Route::get('media/{medium}/edit', [MediaController::class, 'edit'])->name('media.edit');
+        Route::put('media/{medium}', [MediaController::class, 'update'])->name('media.update');
         Route::delete('media/{medium}', [MediaController::class, 'destroy'])->name('media.destroy');
     });
     Route::post('media/jodit', [MediaController::class, 'jodit'])->name('media.jodit');
@@ -123,7 +137,53 @@ Route::middleware('auth')->group(function () {
         Route::delete('messages/{message}', [MessageController::class, 'destroy'])->name('messages.destroy');
     });
 
+    Route::middleware('permission:redirects.view')->group(function () {
+        Route::post('redirects/bulk', [RedirectController::class, 'bulk'])->name('redirects.bulk');
+        Route::resource('redirects', RedirectController::class)->except('show');
+    });
+
+    Route::middleware('permission:blocks.view')->group(function () {
+        Route::post('blocks/bulk', [ContentBlockController::class, 'bulk'])->name('blocks.bulk');
+        Route::resource('blocks', ContentBlockController::class)->except('show');
+    });
+
+    Route::middleware('permission:forms.view')->group(function () {
+        Route::post('forms/bulk', [FormController::class, 'bulk'])->name('forms.bulk');
+        Route::get('forms/{form}/submissions', [FormController::class, 'submissions'])->name('forms.submissions.index');
+        Route::get('forms/{form}/submissions/{submission}', [FormController::class, 'showSubmission'])->name('forms.submissions.show');
+        Route::delete('forms/{form}/submissions/{submission}', [FormController::class, 'destroySubmission'])->name('forms.submissions.destroy');
+        Route::resource('forms', FormController::class)->except('show');
+    });
+
+    Route::middleware('permission:faqs.view')->group(function () {
+        Route::post('faqs/bulk', [FaqController::class, 'bulk'])->name('faqs.bulk');
+        Route::resource('faqs', FaqController::class)->except('show');
+    });
+
+    Route::middleware('permission:team.view')->group(function () {
+        Route::post('team/bulk', [TeamMemberController::class, 'bulk'])->name('team.bulk');
+        Route::resource('team', TeamMemberController::class)->except('show')
+            ->parameters(['team' => 'teamMember']);
+    });
+
+    Route::middleware('permission:portfolio.view')->group(function () {
+        Route::post('portfolio/bulk', [PortfolioController::class, 'bulk'])->name('portfolio.bulk');
+        Route::resource('portfolio', PortfolioController::class)->except('show')
+            ->parameters(['portfolio' => 'portfolioItem']);
+    });
+
     // [admin-module routes] — do not remove; make:admin-module injects here (before settings).
+
+    Route::middleware('permission:activity-logs.view')->group(function () {
+        Route::post('activity-logs/bulk', [ActivityLogController::class, 'bulk'])->name('activity-logs.bulk');
+        Route::get('activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
+        Route::delete('activity-logs/{activityLog}', [ActivityLogController::class, 'destroy'])->name('activity-logs.destroy');
+    });
+
+    Route::middleware('permission:backups.view')->group(function () {
+        Route::get('backups', [BackupController::class, 'index'])->name('backups.index');
+        Route::post('backups/download', [BackupController::class, 'download'])->name('backups.download');
+    });
 
     Route::middleware('permission:settings.view')->group(function () {
         Route::get('settings', [SettingController::class, 'edit'])->name('settings.edit');
