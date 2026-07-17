@@ -31,6 +31,9 @@ $nav = [
     ['label' => 'Redirects', 'route' => 'admin.redirects.index', 'icon' => 'M17 7h-7a4 4 0 000 8h1m-4-4l4-4m-4 4l4 4m3-8h3a4 4 0 010 8h-7', 'can' => 'redirects.view'],
     ['label' => 'Blocks', 'route' => 'admin.blocks.index', 'icon' => 'M4 5h16M4 12h16M4 19h16', 'can' => 'blocks.view'],
     ['label' => 'Forms', 'route' => 'admin.forms.index', 'icon' => 'M9 12h6M9 16h6M8 4h8a2 2 0 012 2v12a2 2 0 01-2 2H8a2 2 0 01-2-2V6a2 2 0 012-2z', 'can' => 'forms.view'],
+    ['label' => 'FAQs', 'route' => 'admin.faqs.index', 'icon' => 'M8 10h.01M12 10h.01M16 10h.01M9 16h6m-9 5h12a2 2 0 002-2V5a2 2 0 00-2-2H6a2 2 0 00-2 2v14a2 2 0 002 2z', 'can' => 'faqs.view'],
+    ['label' => 'Team', 'route' => 'admin.team.index', 'icon' => 'M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87M15 7a4 4 0 11-8 0 4 4 0 018 0z', 'can' => 'team.view'],
+    ['label' => 'Portfolio', 'route' => 'admin.portfolio.index', 'icon' => 'M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z', 'can' => 'portfolio.view'],
     // [admin-module nav] — do not remove; make:admin-module injects here (before Settings).
     ['label' => 'Settings', 'route' => 'admin.settings.edit', 'icon' => 'M10.3 4.3a2 2 0 013.4 0l.5 1a2 2 0 002.3 1l1-.3a2 2 0 012.4 2.4l-.3 1a2 2 0 001 2.3l1 .5a2 2 0 010 3.4l-1 .5a2 2 0 00-1 2.3l.3 1a2 2 0 01-2.4 2.4l-1-.3a2 2 0 00-2.3 1l-.5 1a2 2 0 01-3.4 0l-.5-1a2 2 0 00-2.3-1l-1 .3a2 2 0 01-2.4-2.4l.3-1a2 2 0 00-1-2.3l-1-.5a2 2 0 010-3.4l1-.5a2 2 0 001-2.3l-.3-1A2 2 0 016.5 6l1 .3a2 2 0 002.3-1zM12 15a3 3 0 100-6 3 3 0 000 6z', 'can' => 'settings.view'],
     ['label' => 'Admin Users', 'route' => 'admin.users.index', 'icon' => 'M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 10-4-4 4 4 0 004 4z', 'can' => 'users.view'],

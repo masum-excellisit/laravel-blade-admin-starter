@@ -33,6 +33,13 @@ class AdminPanelEnhancementsTest extends TestCase
         $this->get(route('jobs.index'))->assertOk();
     }
 
+    public function test_cms_platform_public_listing_pages_render_after_seed(): void
+    {
+        $this->get('/faqs')->assertOk();
+        $this->get('/team')->assertOk();
+        $this->get('/portfolio')->assertOk();
+    }
+
     public function test_admin_modules_and_cms_render(): void
     {
         $admin = $this->admin();
@@ -40,6 +47,7 @@ class AdminPanelEnhancementsTest extends TestCase
         $this->actingAs($admin)->get(route('admin.dashboard'))->assertOk();
         $this->actingAs($admin)->get(route('admin.cms.index'))->assertOk();
         $this->actingAs($admin)->get(route('admin.cms.edit', 'home'))->assertOk();
+        $this->actingAs($admin)->get(route('admin.faqs.index'))->assertOk();
         $this->actingAs($admin)->get(route('admin.services.index'))->assertOk();
         $this->actingAs($admin)->get(route('admin.testimonials.index'))->assertOk();
         $this->actingAs($admin)->get(route('admin.jobs.index'))->assertOk();

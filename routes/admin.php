@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\CmsController;
 use App\Http\Controllers\Admin\ContentBlockController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\FormController;
 use App\Http\Controllers\Admin\JobApplicationController;
 use App\Http\Controllers\Admin\JobListingController;
@@ -15,12 +16,14 @@ use App\Http\Controllers\Admin\MenuController;
 use App\Http\Controllers\Admin\MessageController;
 use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\PermissionController;
+use App\Http\Controllers\Admin\PortfolioController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\RedirectController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\TeamMemberController;
 use App\Http\Controllers\Admin\TestimonialController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
@@ -142,6 +145,23 @@ Route::middleware('auth')->group(function () {
         Route::get('forms/{form}/submissions/{submission}', [FormController::class, 'showSubmission'])->name('forms.submissions.show');
         Route::delete('forms/{form}/submissions/{submission}', [FormController::class, 'destroySubmission'])->name('forms.submissions.destroy');
         Route::resource('forms', FormController::class)->except('show');
+    });
+
+    Route::middleware('permission:faqs.view')->group(function () {
+        Route::post('faqs/bulk', [FaqController::class, 'bulk'])->name('faqs.bulk');
+        Route::resource('faqs', FaqController::class)->except('show');
+    });
+
+    Route::middleware('permission:team.view')->group(function () {
+        Route::post('team/bulk', [TeamMemberController::class, 'bulk'])->name('team.bulk');
+        Route::resource('team', TeamMemberController::class)->except('show')
+            ->parameters(['team' => 'teamMember']);
+    });
+
+    Route::middleware('permission:portfolio.view')->group(function () {
+        Route::post('portfolio/bulk', [PortfolioController::class, 'bulk'])->name('portfolio.bulk');
+        Route::resource('portfolio', PortfolioController::class)->except('show')
+            ->parameters(['portfolio' => 'portfolioItem']);
     });
 
     // [admin-module routes] — do not remove; make:admin-module injects here (before settings).
