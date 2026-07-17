@@ -1,3 +1,9 @@
+/* SOURCE REFERENCE ONLY
+ * Runtime CSS is public/css/app.css (committed, no npm).
+ * Do not rely on Vite. Edit public/css/app.css for style changes,
+ * or regenerate that file with a Tailwind CLI elsewhere if you add new utility classes.
+ */
+
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
 

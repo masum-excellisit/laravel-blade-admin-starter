@@ -6,7 +6,7 @@
     <title>@yield('title', $settings['site_name'] ?? config('app.name'))</title>
     <meta name="description" content="@yield('meta_description', $settings['site_tagline'] ?? '')">
     @include('partials.theme')
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @include('partials.assets')
 </head>
 <body class="antialiased bg-white text-slate-800">
 <header x-data="{ open:false }" class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-slate-100">
@@ -47,5 +47,6 @@
     <div class="border-t border-white/10 py-5 text-center text-xs text-slate-500">&copy; {{ date('Y') }} {{ $settings['site_name'] ?? config('app.name') }}. All rights reserved.</div>
 </footer>
 <x-flash />
+@include('partials.assets-scripts')
 </body>
 </html>

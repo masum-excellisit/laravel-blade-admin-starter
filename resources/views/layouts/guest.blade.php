@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'Sign in') · {{ $settings['site_name'] ?? config('app.name') }}</title>
     @include('partials.theme')
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @include('partials.assets')
 </head>
 <body class="antialiased bg-slate-50 text-slate-800">
 <div class="min-h-screen grid lg:grid-cols-2">
@@ -30,5 +30,6 @@
     </div>
 </div>
 <x-flash />
+@include('partials.assets-scripts')
 </body>
 </html>
