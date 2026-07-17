@@ -2,8 +2,8 @@
 
 use App\Http\Controllers\Admin\Auth\LoginController;
 use App\Http\Controllers\Admin\Auth\PasswordResetController;
-use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\ActivityLogController;
+use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CmsController;
 use App\Http\Controllers\Admin\ContentBlockController;
@@ -178,6 +178,11 @@ Route::middleware('auth')->group(function () {
         Route::post('activity-logs/bulk', [ActivityLogController::class, 'bulk'])->name('activity-logs.bulk');
         Route::get('activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
         Route::delete('activity-logs/{activityLog}', [ActivityLogController::class, 'destroy'])->name('activity-logs.destroy');
+    });
+
+    Route::middleware('permission:backups.view')->group(function () {
+        Route::get('backups', [BackupController::class, 'index'])->name('backups.index');
+        Route::post('backups/download', [BackupController::class, 'download'])->name('backups.download');
     });
 
     Route::middleware('permission:settings.view')->group(function () {
