@@ -31,9 +31,8 @@ A reusable **Laravel 12** website + custom **Blade admin panel** starter kit. Cl
 ## Setup
 
 ```bash
-# 1. Install dependencies
+# 1. Install PHP dependencies (Node/npm not required to run the app)
 composer install
-npm install
 
 # 2. Environment
 cp .env.example .env
@@ -46,11 +45,15 @@ php artisan migrate:fresh --seed
 # 4. Storage symlink (for uploaded media/avatars)
 php artisan storage:link
 
-# 5. Build assets
-npm run build      # or: npm run dev
-
-# 6. Serve
+# 5. Serve
 php artisan serve
+```
+
+Compiled frontend assets live in `public/build/` and are committed to the repo, so the site and admin panel work **without Node/npm** on the server. Only install Node when you change CSS/JS and need to rebuild:
+
+```bash
+npm install
+npm run build      # updates public/build — commit the result
 ```
 
 Visit `http://localhost:8000` for the public site and `http://localhost:8000/admin/login` for the admin.

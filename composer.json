@@ -45,6 +45,9 @@
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
             "@php artisan key:generate",
             "@php artisan migrate --force",
+            "@php -r \"file_exists('public/build/manifest.json') || fwrite(STDERR, 'Missing public/build — run npm run build on a machine with Node, then commit public/build.'.PHP_EOL) && exit(1);\""
+        ],
+        "build-assets": [
             "npm install --ignore-scripts",
             "npm run build"
         ],
