@@ -1,11 +1,7 @@
-import Alpine from 'alpinejs';
-import Sortable from 'sortablejs';
-import { Jodit } from 'jodit';
-import 'jodit/es2021/jodit.min.css';
-
-window.Alpine = Alpine;
-window.Sortable = Sortable;
-
+/**
+ * App JS — no build step. Depends on window.Alpine, window.Sortable, window.Jodit
+ * loaded before this file (see partials/assets).
+ */
 document.addEventListener('alpine:init', () => {
     Alpine.data('bulkTable', () => ({
         selected: [],
@@ -68,8 +64,8 @@ document.addEventListener('alpine:init', () => {
     }));
 });
 
-// Initialise Jodit on any [data-jodit] textarea.
 function initEditors(root = document) {
+    if (!window.Jodit) return;
     root.querySelectorAll('textarea[data-jodit]').forEach((el) => {
         if (el.dataset.joditReady) return;
         el.dataset.joditReady = '1';
@@ -90,5 +86,3 @@ function initEditors(root = document) {
 
 document.addEventListener('DOMContentLoaded', () => initEditors());
 window.initEditors = initEditors;
-
-Alpine.start();

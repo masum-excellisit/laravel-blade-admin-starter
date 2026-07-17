@@ -71,3 +71,5 @@ Add a rich editor to any textarea:
 ```
 
 Images dropped/uploaded go through the Media module (`media/jodit` endpoint) and are stored on the `public` disk (auto-resized to ≤1600px).
+
+Jodit is loaded from `public/vendor/jodit/` (no npm).

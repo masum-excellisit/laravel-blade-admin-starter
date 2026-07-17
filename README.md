@@ -5,11 +5,12 @@ A reusable **Laravel 12** website + custom **Blade admin panel** starter kit. Cl
 ## Stack
 
 - **Laravel 12** · PHP 8.2+
-- **Tailwind CSS v4** + **Alpine.js**, bundled via **Vite**
+- **Static frontend assets** (no Node/npm/Vite required)
+- Tailwind-compiled CSS shipped in `public/css/app.css`
+- Alpine.js, SortableJS, and Jodit vendored under `public/vendor/`
 - Custom Blade auth (no Breeze) + **spatie/laravel-permission**
-- **Jodit** rich text editor
 - **intervention/image** for media resizing
-- **MySQL**
+- **MySQL** (or SQLite for local)
 
 ## Features
 
@@ -28,12 +29,11 @@ A reusable **Laravel 12** website + custom **Blade admin panel** starter kit. Cl
 - ⚡ `php artisan make:admin-module {Name}` scaffolds a complete CRUD module (injected **before Settings**)
 - 📱 Responsive: sidebar drawer, responsive tables/forms, light/dark mode
 
-## Setup
+## Setup (PHP only — no npm)
 
 ```bash
-# 1. Install dependencies
+# 1. Install PHP dependencies
 composer install
-npm install
 
 # 2. Environment
 cp .env.example .env
@@ -46,14 +46,23 @@ php artisan migrate:fresh --seed
 # 4. Storage symlink (for uploaded media/avatars)
 php artisan storage:link
 
-# 5. Build assets
-npm run build      # or: npm run dev
-
-# 6. Serve
+# 5. Serve
 php artisan serve
 ```
 
 Visit `http://localhost:8000` for the public site and `http://localhost:8000/admin/login` for the admin.
+
+### Frontend assets (already in the repo)
+
+| Path | Purpose |
+|------|---------|
+| `public/css/app.css` | Compiled Tailwind + theme utilities |
+| `public/js/app.js` | Alpine helpers (bulk tables, menu drag, Jodit init) |
+| `public/vendor/alpine/` | Alpine.js |
+| `public/vendor/sortablejs/` | SortableJS |
+| `public/vendor/jodit/` | Jodit editor JS/CSS |
+
+Edit those files directly when you need UI/behavior changes. **Node and npm are not used.**
 
 ### Seeded logins
 
@@ -84,7 +93,7 @@ The `User` model exposes `admins()` / `customers()` query scopes and `isAdmin()`
 
 Go to **Admin → Settings → Theme** and change the primary/secondary/accent/sidebar colours. They're stored in the DB and rendered as CSS variables in `resources/views/partials/theme.blade.php`, consumed by both the admin panel and the public site — so a client rebrand is a few colour pickers, no code.
 
-To change fonts or base tokens, edit `resources/css/app.css`.
+To change fonts or base tokens, edit `public/css/app.css`.
 
 ## Mail
 
@@ -111,6 +120,7 @@ routes/admin.php               Admin routes (prefix /admin, name admin.)
 resources/views/admin/**       Admin views
 resources/views/site/**        Public views
 resources/views/components/**  Reusable Blade components (x-btn, x-card, x-table, x-form.*, …)
+public/css, public/js, public/vendor   Static frontend (no npm)
 database/seeders/*             Roles, admin user, settings, demo content
 stubs/admin-module/*           Templates used by make:admin-module
 ```

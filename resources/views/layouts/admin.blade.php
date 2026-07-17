@@ -14,7 +14,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin') · {{ $settings['site_name'] ?? config('app.name') }}</title>
     @include('partials.theme')
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @include('partials.assets')
 </head>
 <body class="admin-bg text-slate-800 dark:text-slate-200 antialiased">
 <div class="min-h-screen">
@@ -95,6 +95,6 @@
     </div>
 </div>
 <x-flash />
-@stack('scripts')
+@include('partials.assets-scripts')
 </body>
 </html>
