@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\Concerns\HandlesBulkActions;
 use App\Http\Controllers\Admin\Concerns\HandlesListQuery;
 use App\Http\Controllers\Controller;
 use App\Models\Redirect;
+use App\Support\Activity;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -51,7 +52,12 @@ class RedirectController extends Controller
     {
         abort_unless($request->user()->can('redirects.create'), 403);
 
-        Redirect::create($this->validated($request));
+        $redirect = Redirect::create($this->validated($request));
+
+        Activity::log('created', $redirect, 'Redirect created', [
+            'from_path' => $redirect->from_path,
+            'to_url' => $redirect->to_url,
+        ]);
 
         return redirect()->route('admin.redirects.index')->with('success', 'Redirect created.');
     }

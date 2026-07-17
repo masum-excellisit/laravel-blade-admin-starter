@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
+use App\Support\Activity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -52,6 +53,7 @@ class SettingController extends Controller
         }
 
         Setting::flush();
+        Activity::log('updated', null, 'Settings updated');
 
         return back()->with('success', 'Settings saved.');
     }

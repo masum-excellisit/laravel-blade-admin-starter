@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasRevisions;
 use Illuminate\Database\Eloquent\Model;
 
 class Post extends Model
 {
+    use HasRevisions;
+
     protected $fillable = [
         'title', 'slug', 'excerpt', 'body', 'featured_image',
         'category_id', 'author_id', 'meta_title', 'meta_description',

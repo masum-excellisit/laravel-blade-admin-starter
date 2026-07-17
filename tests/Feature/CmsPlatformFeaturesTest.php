@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Mail\ContactAutoReply;
+use App\Mail\ContactMessageNotification;
 use App\Models\ActivityLog;
 use App\Models\Concerns\HasRevisions;
 use App\Models\ContentBlock;
@@ -24,6 +26,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -283,6 +286,81 @@ class CmsPlatformFeaturesTest extends TestCase
         $response->assertStatus(503);
         $response->assertSee('Scheduled maintenance');
         $response->assertSee('Please check back soon.');
+    }
+
+    public function test_contact_submit_sends_notification_and_auto_reply(): void
+    {
+        Mail::fake();
+
+        Setting::put('notify_contact_email', 'notify@example.com', 'notifications');
+        Setting::put('contact_email', 'fallback@example.com', 'general');
+        Setting::put('notify_auto_reply', '1', 'notifications', 'boolean');
+        Setting::put('notify_auto_reply_subject', 'Thanks for writing', 'notifications');
+        Setting::put('notify_auto_reply_body', 'We will reply soon.', 'notifications', 'textarea');
+
+        $this->post(route('contact.submit'), [
+            'name' => 'Ada Lovelace',
+            'email' => 'ada@example.com',
+            'subject' => 'Project question',
+            'message' => 'Can we work together?',
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('contact_messages', [
+            'email' => 'ada@example.com',
+            'subject' => 'Project question',
+        ]);
+
+        Mail::assertSent(ContactMessageNotification::class, function (ContactMessageNotification $mail) {
+            return $mail->hasTo('notify@example.com')
+                && str_contains($mail->messageModel->message, 'Can we work together?');
+        });
+
+        Mail::assertSent(ContactAutoReply::class, function (ContactAutoReply $mail) {
+            return $mail->hasTo('ada@example.com')
+                && $mail->subjectLine === 'Thanks for writing';
+        });
+    }
+
+    public function test_activity_log_index_renders_for_admin(): void
+    {
+        $this->seed();
+        ActivityLog::create([
+            'action' => 'updated',
+            'description' => 'Updated page copy',
+            'ip_address' => '203.0.113.10',
+        ]);
+
+        $admin = User::where('email', 'superadmin@yopmail.com')->firstOrFail();
+
+        $this->actingAs($admin)
+            ->get(route('admin.activity-logs.index', ['search' => 'page', 'sort' => 'action', 'direction' => 'asc']))
+            ->assertOk()
+            ->assertSee('Activity Log')
+            ->assertSee('Updated page copy');
+    }
+
+    public function test_page_revision_restore_route_restores_previous_state(): void
+    {
+        $this->seed();
+        $admin = User::where('email', 'superadmin@yopmail.com')->firstOrFail();
+
+        $page = Page::create([
+            'title' => 'Original title',
+            'slug' => 'original-title',
+            'body' => 'Original body',
+            'status' => 'draft',
+            'template' => 'default',
+        ]);
+
+        $this->actingAs($admin);
+        $revision = $page->recordRevision('before update');
+        $page->update(['title' => 'Changed title', 'body' => 'Changed body']);
+
+        $this->post(route('admin.pages.revisions.restore', [$page, $revision]))
+            ->assertRedirect(route('admin.pages.edit', $page));
+
+        $this->assertSame('Original title', $page->fresh()->title);
+        $this->assertSame('Original body', $page->fresh()->body);
     }
 }
 

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\Auth\LoginController;
 use App\Http\Controllers\Admin\Auth\PasswordResetController;
+use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CmsController;
 use App\Http\Controllers\Admin\ContentBlockController;
@@ -69,6 +70,7 @@ Route::middleware('auth')->group(function () {
         Route::get('cms', [CmsController::class, 'index'])->name('cms.index');
         Route::get('cms/{page}', [CmsController::class, 'edit'])->name('cms.edit');
         Route::put('cms/{page}', [CmsController::class, 'update'])->name('cms.update');
+        Route::post('cms/{page}/revisions/{revision}/restore', [CmsController::class, 'restoreRevision'])->name('cms.revisions.restore');
     });
 
     Route::middleware('permission:services.view')->group(function () {
@@ -98,10 +100,12 @@ Route::middleware('auth')->group(function () {
     Route::middleware('permission:pages.view')->group(function () {
         Route::post('pages/bulk', [PageController::class, 'bulk'])->name('pages.bulk');
         Route::resource('pages', PageController::class)->except('show');
+        Route::post('pages/{page}/revisions/{revision}/restore', [PageController::class, 'restoreRevision'])->name('pages.revisions.restore');
     });
     Route::middleware('permission:posts.view')->group(function () {
         Route::post('posts/bulk', [PostController::class, 'bulk'])->name('posts.bulk');
         Route::resource('posts', PostController::class)->except('show');
+        Route::post('posts/{post}/revisions/{revision}/restore', [PostController::class, 'restoreRevision'])->name('posts.revisions.restore');
     });
     Route::middleware('permission:categories.view')->group(function () {
         Route::post('categories/bulk', [CategoryController::class, 'bulk'])->name('categories.bulk');
@@ -165,6 +169,12 @@ Route::middleware('auth')->group(function () {
     });
 
     // [admin-module routes] — do not remove; make:admin-module injects here (before settings).
+
+    Route::middleware('permission:activity-logs.view')->group(function () {
+        Route::post('activity-logs/bulk', [ActivityLogController::class, 'bulk'])->name('activity-logs.bulk');
+        Route::get('activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
+        Route::delete('activity-logs/{activityLog}', [ActivityLogController::class, 'destroy'])->name('activity-logs.destroy');
+    });
 
     Route::middleware('permission:settings.view')->group(function () {
         Route::get('settings', [SettingController::class, 'edit'])->name('settings.edit');

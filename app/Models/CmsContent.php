@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasRevisions;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 class CmsContent extends Model
 {
+    use HasRevisions;
+
     protected $fillable = ['page', 'section', 'data'];
 
     protected $casts = [

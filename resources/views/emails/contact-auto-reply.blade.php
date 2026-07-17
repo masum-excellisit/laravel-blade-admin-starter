@@ -1,0 +1,3 @@
+Hello {{ $messageModel->name }},
+
+{{ $body }}

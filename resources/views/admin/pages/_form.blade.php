@@ -16,6 +16,14 @@
                 <x-btn type="submit" class="w-full">{{ $page->exists ? 'Update page' : 'Create page' }}</x-btn>
             </div>
         </x-card>
+        @if($page->exists)
+            @include('admin.revisions._list', [
+                'revisions' => $revisions ?? collect(),
+                'restoreRouteName' => 'admin.pages.revisions.restore',
+                'model' => $page,
+                'permission' => 'pages.edit',
+            ])
+        @endif
         <x-seo-fields :model="$page" />
     </div>
 </div>
