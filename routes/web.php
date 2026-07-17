@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Site\AccountController;
 use App\Http\Controllers\Site\BlogController;
 use App\Http\Controllers\Site\CmsPageController;
 use App\Http\Controllers\Site\ContactController;
@@ -41,6 +42,19 @@ Route::post('/contact', [ContactController::class, 'submit'])->name('contact.sub
 
 Route::get('/forms/{slug}', [FormController::class, 'show'])->name('forms.show');
 Route::post('/forms/{slug}', [FormController::class, 'submit'])->name('forms.submit');
+
+Route::middleware('guest')->group(function () {
+    Route::get('/account/login', [AccountController::class, 'showLogin'])->name('account.login');
+    Route::post('/account/login', [AccountController::class, 'login'])->name('account.login.submit');
+    Route::get('/account/register', [AccountController::class, 'showRegister'])->name('account.register');
+    Route::post('/account/register', [AccountController::class, 'register'])->name('account.register.submit');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::post('/account/logout', [AccountController::class, 'logout'])->name('account.logout');
+    Route::get('/account/profile', [AccountController::class, 'profile'])->name('account.profile');
+    Route::put('/account/profile', [AccountController::class, 'updateProfile'])->name('account.profile.update');
+});
 
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');

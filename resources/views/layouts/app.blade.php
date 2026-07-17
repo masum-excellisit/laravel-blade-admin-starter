@@ -20,12 +20,41 @@
             <x-site.menu location="header" class="hover:text-primary transition" />
         </nav>
         <div class="flex items-center gap-3">
-            <a href="{{ route('admin.dashboard') }}" class="hidden sm:inline"><x-btn size="sm" variant="outline">Admin</x-btn></a>
+            @auth
+                @if(auth()->user()->isCustomer())
+                    <a href="{{ route('account.profile') }}" class="hidden sm:inline text-sm font-semibold text-slate-600 hover:text-primary">Account</a>
+                    <form method="POST" action="{{ route('account.logout') }}" class="hidden sm:inline">
+                        @csrf
+                        <x-btn type="submit" size="sm" variant="outline">Logout</x-btn>
+                    </form>
+                @else
+                    <a href="{{ route('admin.dashboard') }}" class="hidden sm:inline"><x-btn size="sm" variant="outline">Admin</x-btn></a>
+                @endif
+            @else
+                <a href="{{ route('account.login') }}" class="hidden sm:inline text-sm font-semibold text-slate-600 hover:text-primary">Login</a>
+                <a href="{{ route('account.register') }}" class="hidden sm:inline"><x-btn size="sm">Register</x-btn></a>
+                <a href="{{ route('admin.dashboard') }}" class="hidden sm:inline"><x-btn size="sm" variant="outline">Admin</x-btn></a>
+            @endauth
             <button x-on:click="open=!open" class="md:hidden text-slate-600"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
         </div>
     </div>
     <div x-show="open" x-cloak class="md:hidden border-t border-slate-100 px-4 py-3 flex flex-col gap-2 text-sm font-medium text-slate-600">
         <x-site.menu location="header" class="py-1.5 hover:text-primary" />
+        @auth
+            @if(auth()->user()->isCustomer())
+                <a href="{{ route('account.profile') }}" class="py-1.5 hover:text-primary">Account</a>
+                <form method="POST" action="{{ route('account.logout') }}">
+                    @csrf
+                    <button type="submit" class="py-1.5 hover:text-primary">Logout</button>
+                </form>
+            @else
+                <a href="{{ route('admin.dashboard') }}" class="py-1.5 hover:text-primary">Admin</a>
+            @endif
+        @else
+            <a href="{{ route('account.login') }}" class="py-1.5 hover:text-primary">Login</a>
+            <a href="{{ route('account.register') }}" class="py-1.5 hover:text-primary">Register</a>
+            <a href="{{ route('admin.dashboard') }}" class="py-1.5 hover:text-primary">Admin</a>
+        @endauth
     </div>
 </header>
 

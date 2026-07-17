@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\Auth\LoginController;
 use App\Http\Controllers\Admin\Auth\PasswordResetController;
+use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CmsController;
@@ -120,8 +121,11 @@ Route::middleware('auth')->group(function () {
     });
     Route::middleware('permission:media.view')->group(function () {
         Route::post('media/bulk', [MediaController::class, 'bulk'])->name('media.bulk');
+        Route::post('media/cleanup', [MediaController::class, 'cleanup'])->name('media.cleanup');
         Route::get('media', [MediaController::class, 'index'])->name('media.index');
         Route::post('media', [MediaController::class, 'store'])->name('media.store');
+        Route::get('media/{medium}/edit', [MediaController::class, 'edit'])->name('media.edit');
+        Route::put('media/{medium}', [MediaController::class, 'update'])->name('media.update');
         Route::delete('media/{medium}', [MediaController::class, 'destroy'])->name('media.destroy');
     });
     Route::post('media/jodit', [MediaController::class, 'jodit'])->name('media.jodit');

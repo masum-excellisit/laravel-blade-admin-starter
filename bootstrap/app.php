@@ -24,8 +24,12 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->redirectGuestsTo(fn () => route('admin.login'));
-        $middleware->redirectUsersTo(fn () => route('admin.dashboard'));
+        $middleware->redirectGuestsTo(fn (Request $request) => $request->is('account/*')
+            ? route('account.login')
+            : route('admin.login'));
+        $middleware->redirectUsersTo(fn (Request $request) => $request->is('account/*')
+            ? route('account.profile')
+            : route('admin.dashboard'));
         $middleware->web(append: [
             HandleRedirects::class,
             CheckMaintenanceMode::class,
