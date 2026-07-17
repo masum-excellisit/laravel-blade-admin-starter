@@ -7,6 +7,7 @@ use App\Models\Concerns\HasRevisions;
 use App\Models\ContentBlock;
 use App\Models\Form;
 use App\Models\FormField;
+use App\Models\FormSubmission;
 use App\Models\Page;
 use App\Models\PortfolioItem;
 use App\Models\User;
@@ -24,6 +25,50 @@ use Tests\TestCase;
 class CmsPlatformFeaturesTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_public_form_submission_stores_field_payload(): void
+    {
+        $form = Form::create([
+            'name' => 'Contact Quote',
+            'slug' => 'contact-quote',
+            'success_message' => 'Thanks for reaching out.',
+            'is_active' => true,
+        ]);
+
+        FormField::create([
+            'form_id' => $form->id,
+            'label' => 'Name',
+            'name' => 'name',
+            'type' => 'text',
+            'required' => true,
+            'sort_order' => 10,
+        ]);
+
+        FormField::create([
+            'form_id' => $form->id,
+            'label' => 'Budget',
+            'name' => 'budget',
+            'type' => 'select',
+            'options' => ['under-5k', 'over-5k'],
+            'required' => true,
+            'sort_order' => 20,
+        ]);
+
+        $this->post(route('forms.submit', $form->slug), [
+            'name' => 'Ada Lovelace',
+            'budget' => 'over-5k',
+        ])
+            ->assertRedirect()
+            ->assertSessionHas('success', 'Thanks for reaching out.');
+
+        $submission = FormSubmission::firstOrFail();
+
+        $this->assertTrue($submission->form->is($form));
+        $this->assertSame([
+            'name' => 'Ada Lovelace',
+            'budget' => 'over-5k',
+        ], $submission->data);
+    }
 
     public function test_forms_order_fields_and_cast_structured_payloads(): void
     {

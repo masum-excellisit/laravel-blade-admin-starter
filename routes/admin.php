@@ -4,8 +4,10 @@ use App\Http\Controllers\Admin\Auth\LoginController;
 use App\Http\Controllers\Admin\Auth\PasswordResetController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CmsController;
+use App\Http\Controllers\Admin\ContentBlockController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\FormController;
 use App\Http\Controllers\Admin\JobApplicationController;
 use App\Http\Controllers\Admin\JobListingController;
 use App\Http\Controllers\Admin\MediaController;
@@ -121,6 +123,19 @@ Route::middleware('auth')->group(function () {
         Route::get('messages', [MessageController::class, 'index'])->name('messages.index');
         Route::get('messages/{message}', [MessageController::class, 'show'])->name('messages.show');
         Route::delete('messages/{message}', [MessageController::class, 'destroy'])->name('messages.destroy');
+    });
+
+    Route::middleware('permission:blocks.view')->group(function () {
+        Route::post('blocks/bulk', [ContentBlockController::class, 'bulk'])->name('blocks.bulk');
+        Route::resource('blocks', ContentBlockController::class)->except('show');
+    });
+
+    Route::middleware('permission:forms.view')->group(function () {
+        Route::post('forms/bulk', [FormController::class, 'bulk'])->name('forms.bulk');
+        Route::get('forms/{form}/submissions', [FormController::class, 'submissions'])->name('forms.submissions.index');
+        Route::get('forms/{form}/submissions/{submission}', [FormController::class, 'showSubmission'])->name('forms.submissions.show');
+        Route::delete('forms/{form}/submissions/{submission}', [FormController::class, 'destroySubmission'])->name('forms.submissions.destroy');
+        Route::resource('forms', FormController::class)->except('show');
     });
 
     // [admin-module routes] — do not remove; make:admin-module injects here (before settings).

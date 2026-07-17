@@ -51,6 +51,13 @@ class AdminPanelEnhancementsTest extends TestCase
         $this->actingAs($admin)->get(route('admin.settings.edit'))->assertOk();
     }
 
+    public function test_admin_blocks_index_renders_for_admin(): void
+    {
+        $this->actingAs($this->admin())
+            ->get(route('admin.blocks.index'))
+            ->assertOk();
+    }
+
     public function test_pages_list_supports_search_and_sort(): void
     {
         $admin = $this->admin();

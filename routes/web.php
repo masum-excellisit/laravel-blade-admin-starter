@@ -3,6 +3,7 @@
 use App\Http\Controllers\Site\BlogController;
 use App\Http\Controllers\Site\CmsPageController;
 use App\Http\Controllers\Site\ContactController;
+use App\Http\Controllers\Site\FormController;
 use App\Http\Controllers\Site\HomeController;
 use App\Http\Controllers\Site\JobController;
 use App\Http\Controllers\Site\PageController;
@@ -28,6 +29,9 @@ Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
 Route::get('/contact', [ContactController::class, 'show'])->name('contact');
 Route::post('/contact', [ContactController::class, 'submit'])->name('contact.submit');
+
+Route::get('/forms/{slug}', [FormController::class, 'show'])->name('forms.show');
+Route::post('/forms/{slug}', [FormController::class, 'submit'])->name('forms.submit');
 
 // Dynamic DB pages — keep last so it doesn't shadow named routes.
 Route::get('/{slug}', [PageController::class, 'show'])->where('slug', '^(?!admin$|admin/).*')->name('page.show');

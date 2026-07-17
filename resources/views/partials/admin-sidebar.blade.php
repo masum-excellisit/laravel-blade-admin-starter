@@ -28,6 +28,8 @@ $nav = [
     ['label' => 'Menus', 'route' => 'admin.menus.index', 'icon' => 'M4 6h16M4 12h16M4 18h16', 'can' => 'menus.view'],
     ['label' => 'Media', 'route' => 'admin.media.index', 'icon' => 'M4 5a2 2 0 012-2h12a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm4 8l2.5 3 3.5-4.5L19 19', 'can' => 'media.view'],
     ['label' => 'Messages', 'route' => 'admin.messages.index', 'icon' => 'M3 8l9 6 9-6M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', 'can' => 'messages.view'],
+    ['label' => 'Blocks', 'route' => 'admin.blocks.index', 'icon' => 'M4 5h16M4 12h16M4 19h16', 'can' => 'blocks.view'],
+    ['label' => 'Forms', 'route' => 'admin.forms.index', 'icon' => 'M9 12h6M9 16h6M8 4h8a2 2 0 012 2v12a2 2 0 01-2 2H8a2 2 0 01-2-2V6a2 2 0 012-2z', 'can' => 'forms.view'],
     // [admin-module nav] — do not remove; make:admin-module injects here (before Settings).
     ['label' => 'Settings', 'route' => 'admin.settings.edit', 'icon' => 'M10.3 4.3a2 2 0 013.4 0l.5 1a2 2 0 002.3 1l1-.3a2 2 0 012.4 2.4l-.3 1a2 2 0 001 2.3l1 .5a2 2 0 010 3.4l-1 .5a2 2 0 00-1 2.3l.3 1a2 2 0 01-2.4 2.4l-1-.3a2 2 0 00-2.3 1l-.5 1a2 2 0 01-3.4 0l-.5-1a2 2 0 00-2.3-1l-1 .3a2 2 0 01-2.4-2.4l.3-1a2 2 0 00-1-2.3l-1-.5a2 2 0 010-3.4l1-.5a2 2 0 001-2.3l-.3-1A2 2 0 016.5 6l1 .3a2 2 0 002.3-1zM12 15a3 3 0 100-6 3 3 0 000 6z', 'can' => 'settings.view'],
     ['label' => 'Admin Users', 'route' => 'admin.users.index', 'icon' => 'M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 10-4-4 4 4 0 004 4z', 'can' => 'users.view'],
