@@ -62,6 +62,60 @@ document.addEventListener('alpine:init', () => {
             });
         },
     }));
+
+    Alpine.data('sidebarScroll', () => ({
+        canScrollUp: false,
+        canScrollDown: false,
+        el: null,
+        observer: null,
+        init() {
+            this.$nextTick(() => {
+                this.el = this.$refs.navScroll;
+                if (!this.el) return;
+
+                this.update();
+                requestAnimationFrame(() => {
+                    this.scrollActiveIntoView();
+                    this.update();
+                });
+
+                this.observer = new ResizeObserver(() => this.update());
+                this.observer.observe(this.el);
+                if (this.el.firstElementChild) {
+                    this.observer.observe(this.el.firstElementChild);
+                }
+
+                // Recalculate when the sidebar expands/collapses.
+                this.$watch('$root.collapsed', () => {
+                    this.$nextTick(() => this.update());
+                });
+            });
+        },
+        update() {
+            const el = this.el || this.$refs.navScroll;
+            if (!el) return;
+            this.el = el;
+            const max = el.scrollHeight - el.clientHeight;
+            const top = el.scrollTop;
+            this.canScrollUp = top > 4;
+            this.canScrollDown = max > 4 && top < max - 4;
+        },
+        scrollActiveIntoView() {
+            const el = this.el || this.$refs.navScroll;
+            if (!el) return;
+            const active = el.querySelector('a.brand-gradient');
+            if (!active) return;
+            const elRect = el.getBoundingClientRect();
+            const activeRect = active.getBoundingClientRect();
+            const fullyVisible = activeRect.top >= elRect.top + 8 && activeRect.bottom <= elRect.bottom - 8;
+            if (!fullyVisible) {
+                active.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+            }
+        },
+        destroy() {
+            this.observer?.disconnect();
+        },
+    }));
 });
 
 function initEditors(root = document) {

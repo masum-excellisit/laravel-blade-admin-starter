@@ -30,8 +30,22 @@
                 <span class="h-9 w-9 rounded-xl brand-gradient flex items-center justify-center text-white text-lg shadow-lg">◆</span>
             </div>
         </div>
-        <div class="flex-1 overflow-y-auto py-2" :class="collapsed ? 'px-2' : ''">
-            @include('partials.admin-sidebar')
+        <div class="admin-sidebar-scroll-shell"
+             x-data="sidebarScroll"
+             :class="{
+                 'is-scrollable-up': canScrollUp,
+                 'is-scrollable-down': canScrollDown
+             }">
+            <div class="admin-sidebar-scroll-fade admin-sidebar-scroll-fade--top" aria-hidden="true"></div>
+            <div
+                x-ref="navScroll"
+                class="admin-sidebar-scroll py-2"
+                :class="collapsed ? 'px-2' : ''"
+                @scroll.passive="update()"
+            >
+                @include('partials.admin-sidebar')
+            </div>
+            <div class="admin-sidebar-scroll-fade admin-sidebar-scroll-fade--bottom" aria-hidden="true"></div>
         </div>
         <div class="shrink-0 p-3 border-t border-white/10">
             <button x-on:click="collapsed=!collapsed" class="hidden lg:flex items-center gap-2 w-full px-3 py-2 rounded-xl text-slate-400 hover:bg-white/5 hover:text-white text-sm transition">
