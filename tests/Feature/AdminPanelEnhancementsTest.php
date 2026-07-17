@@ -74,6 +74,24 @@ class AdminPanelEnhancementsTest extends TestCase
         $this->assertStringContainsString('name="search"', $html);
     }
 
+    public function test_table_sort_uses_single_direction_icon(): void
+    {
+        $unsorted = $this->actingAs($this->admin())
+            ->get(route('admin.pages.index'))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('table-sort-icon--idle', $unsorted);
+
+        $sorted = $this->actingAs($this->admin())
+            ->get(route('admin.pages.index', ['sort' => 'title', 'direction' => 'asc']))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('table-sort-icon--active', $sorted);
+        $this->assertStringContainsString('direction=desc', $sorted);
+    }
+
     public function test_bulk_delete_pages(): void
     {
         $admin = $this->admin();

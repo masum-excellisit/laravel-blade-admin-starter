@@ -45,12 +45,22 @@
                         <th class="px-4 py-3 text-left font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs whitespace-nowrap">
                             @if($isSortable)
                                 <a href="{{ request()->fullUrlWithQuery(['sort' => $key, 'direction' => $nextDir, 'page' => null]) }}"
-                                   class="inline-flex items-center gap-1 hover:text-slate-800 dark:hover:text-slate-200 transition group">
+                                   class="inline-flex items-center gap-1.5 hover:text-slate-800 dark:hover:text-slate-200 transition"
+                                   title="Sort by {{ $label }}">
                                     <span>{{ $label }}</span>
-                                    <span class="inline-flex flex-col leading-none text-[9px] opacity-40 group-hover:opacity-80 {{ $isActive ? '!opacity-100 text-indigo-500' : '' }}">
-                                        <svg class="w-3 h-3 {{ $isActive && $currentDir === 'asc' ? 'text-indigo-600' : '' }}" viewBox="0 0 12 12" fill="currentColor"><path d="M6 3L9.5 7h-7L6 3z"/></svg>
-                                        <svg class="w-3 h-3 -mt-1 {{ $isActive && $currentDir === 'desc' ? 'text-indigo-600' : '' }}" viewBox="0 0 12 12" fill="currentColor"><path d="M6 9L2.5 5h-7L6 9z"/></svg>
-                                    </span>
+                                    @if($isActive && $currentDir === 'asc')
+                                        <svg class="table-sort-icon table-sort-icon--active" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                            <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"/>
+                                        </svg>
+                                    @elseif($isActive)
+                                        <svg class="table-sort-icon table-sort-icon--active" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                        </svg>
+                                    @else
+                                        <svg class="table-sort-icon table-sort-icon--idle" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                            <path d="M6 8l4-4 4 4M6 12l4 4 4-4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    @endif
                                 </a>
                             @else
                                 {{ $label }}

@@ -119,3 +119,10 @@
 .dark .perm-row__icon--edit{background:rgba(146,64,14,.35);color:#fcd34d}
 .dark .perm-row__icon--delete{background:rgba(159,18,57,.35);color:#fda4af}
 .dark .perm-row__icon--default{background:#334155;color:#cbd5e1}
+
+/* table-sort-icon */
+.table-sort-icon{width:0.875rem;height:0.875rem;flex-shrink:0;display:inline-block;vertical-align:middle}
+.table-sort-icon--idle{opacity:.4}
+.table-sort-icon--active{color:#6366f1;opacity:1}
+.dark .table-sort-icon--active{color:#818cf8}
+a:hover .table-sort-icon--idle{opacity:.75}
