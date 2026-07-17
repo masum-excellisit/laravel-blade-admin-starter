@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\HandlesBulkActions;
+use App\Http\Controllers\Admin\Concerns\HandlesListQuery;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CustomerRequest;
 use App\Models\User;
@@ -11,14 +13,42 @@ use Illuminate\Support\Facades\Storage;
 
 class CustomerController extends Controller
 {
+    use HandlesBulkActions, HandlesListQuery;
+
     public function index(Request $request)
     {
-        $customers = User::customers()
-            ->when($request->search, fn ($q, $s) => $q->where(fn ($q) => $q->where('name', 'like', "%$s%")->orWhere('email', 'like', "%$s%")))
-            ->when($request->status !== null && $request->status !== '', fn ($q) => $q->where('status', $request->status))
-            ->latest()->paginate(12)->withQueryString();
+        $query = User::customers();
+
+        if ($request->status !== null && $request->status !== '') {
+            $query->where('status', $request->status);
+        }
+
+        $customers = $this->applyListQuery(
+            $query,
+            $request,
+            ['name', 'email'],
+            ['name', 'email', 'status', 'created_at'],
+        )->paginate(12)->withQueryString();
 
         return view('admin.customers.index', compact('customers'));
+    }
+
+    public function bulk(Request $request)
+    {
+        return $this->runBulkAction($request, User::class, 'customers', function ($query, $action, $ids) use ($request) {
+            $query->customers();
+
+            match ($action) {
+                'delete' => tap($query)->get()->each(function (User $customer) use ($request) {
+                    abort_unless($request->user()->can('customers.delete'), 403);
+                    abort_unless($customer->isCustomer(), 404);
+                    $customer->delete();
+                }),
+                'activate' => $this->bulkSetStatus($request, $query, 'customers', true, 'status'),
+                'deactivate' => $this->bulkSetStatus($request, $query, 'customers', false, 'status'),
+                default => abort(422, 'Unknown bulk action.'),
+            };
+        });
     }
 
     public function create()

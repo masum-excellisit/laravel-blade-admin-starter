@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\HandlesBulkActions;
+use App\Http\Controllers\Admin\Concerns\HandlesListQuery;
 use App\Http\Controllers\Controller;
 use App\Models\Media;
 use Illuminate\Http\Request;
@@ -10,9 +12,32 @@ use Intervention\Image\Laravel\Facades\Image;
 
 class MediaController extends Controller
 {
-    public function index()
+    use HandlesBulkActions, HandlesListQuery;
+
+    public function index(Request $request)
     {
-        return view('admin.media.index', ['media' => Media::latest()->paginate(24)]);
+        $media = $this->applyListQuery(
+            Media::query(),
+            $request,
+            ['name'],
+            ['created_at'],
+        )->paginate(24)->withQueryString();
+
+        return view('admin.media.index', compact('media'));
+    }
+
+    public function bulk(Request $request)
+    {
+        return $this->runBulkAction($request, Media::class, 'media', function ($query, $action, $ids) use ($request) {
+            match ($action) {
+                'delete' => tap($query)->get()->each(function (Media $medium) use ($request) {
+                    abort_unless($request->user()->can('media.delete'), 403);
+                    Storage::disk($medium->disk)->delete($medium->path);
+                    $medium->delete();
+                }),
+                default => abort(422, 'Unknown bulk action.'),
+            };
+        });
     }
 
     public function store(Request $request)

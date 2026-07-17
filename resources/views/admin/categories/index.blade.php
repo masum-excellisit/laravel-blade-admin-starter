@@ -2,11 +2,24 @@
 @section('title', 'Categories')
 @section('content')
 <x-page-header title="Categories" subtitle="Organise posts into categories." />
+
+<x-search placeholder="Search categories…" />
+
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <div class="lg:col-span-2">
-        <x-table :headings="['Name', 'Slug', 'Parent', 'Posts', '']">
+        <x-table bulk :columns="[
+            ['key' => 'name', 'label' => 'Name', 'sortable' => true],
+            ['key' => null, 'label' => 'Slug', 'sortable' => false],
+            ['key' => null, 'label' => 'Parent', 'sortable' => false],
+            ['key' => null, 'label' => 'Posts', 'sortable' => false],
+            ['key' => null, 'label' => '', 'sortable' => false],
+        ]">
+            <x-slot:toolbar>
+                <x-bulk-actions :action="route('admin.categories.bulk')" :options="['delete' => 'Delete selected']" />
+            </x-slot:toolbar>
             @forelse($categories as $cat)
             <tr x-data="{ edit:false }" class="hover:bg-slate-50 dark:hover:bg-slate-800/60">
+                <x-table-checkbox :id="$cat->id" />
                 <td class="px-4 py-3 font-medium">
                     <span x-show="!edit">{{ $cat->name }}</span>
                     <form x-show="edit" x-cloak method="POST" action="{{ route('admin.categories.update', $cat) }}" class="flex gap-2">@csrf @method('PUT')
@@ -26,8 +39,9 @@
                     @can('categories.delete')<form method="POST" action="{{ route('admin.categories.destroy', $cat) }}" class="inline ml-2" onsubmit="return confirm('Delete?')">@csrf @method('DELETE')<button class="text-xs text-red-500">Del</button></form>@endcan
                 </td>
             </tr>
-            @empty<tr><td colspan="5" class="px-4 py-10 text-center text-slate-400">No categories yet.</td></tr>@endforelse
+            @empty<tr><td colspan="6" class="px-4 py-10 text-center text-slate-400">No categories yet.</td></tr>@endforelse
         </x-table>
+        <div class="mt-4">{{ $categories->links() }}</div>
     </div>
     @can('categories.create')
     <x-card title="Add category">

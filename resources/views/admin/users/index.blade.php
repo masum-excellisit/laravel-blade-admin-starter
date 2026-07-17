@@ -9,15 +9,27 @@
 
 <x-search placeholder="Search by name or email…" />
 
-<x-table :headings="['User', 'Roles', 'Status', 'Last login', '']">
+<x-table bulk :columns="[
+    ['key' => 'name', 'label' => 'Name', 'sortable' => true],
+    ['key' => 'email', 'label' => 'Email', 'sortable' => true],
+    ['key' => null, 'label' => 'Roles', 'sortable' => false],
+    ['key' => 'status', 'label' => 'Status', 'sortable' => true],
+    ['key' => 'last_login_at', 'label' => 'Last login', 'sortable' => true],
+    ['key' => null, 'label' => '', 'sortable' => false],
+]">
+    <x-slot:toolbar>
+        <x-bulk-actions :action="route('admin.users.bulk')" :options="['delete' => 'Delete selected', 'activate' => 'Activate', 'deactivate' => 'Deactivate']" />
+    </x-slot:toolbar>
     @forelse($users as $user)
     <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/60">
+        <x-table-checkbox :id="$user->id" />
         <td class="px-4 py-3">
             <div class="flex items-center gap-3">
                 <span class="h-9 w-9 rounded-full brand-gradient text-white text-xs font-semibold flex items-center justify-center">{{ $user->initials() }}</span>
-                <div><p class="font-medium text-slate-800 dark:text-slate-100">{{ $user->name }}</p><p class="text-xs text-slate-400">{{ $user->email }}</p></div>
+                <p class="font-medium text-slate-800 dark:text-slate-100">{{ $user->name }}</p>
             </div>
         </td>
+        <td class="px-4 py-3 text-slate-500">{{ $user->email }}</td>
         <td class="px-4 py-3">@foreach($user->roles as $role)<x-badge color="indigo" class="mr-1">{{ $role->name }}</x-badge>@endforeach</td>
         <td class="px-4 py-3"><x-badge :color="$user->status ? 'green' : 'red'">{{ $user->status ? 'Active' : 'Disabled' }}</x-badge></td>
         <td class="px-4 py-3 text-slate-500">{{ $user->last_login_at?->diffForHumans() ?? '—' }}</td>
@@ -32,7 +44,7 @@
         </td>
     </tr>
     @empty
-    <tr><td colspan="5" class="px-4 py-12 text-center text-slate-400">No users found.</td></tr>
+    <tr><td colspan="7" class="px-4 py-12 text-center text-slate-400">No users found.</td></tr>
     @endforelse
 </x-table>
 {{ $users->links() }}

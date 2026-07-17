@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\HandlesBulkActions;
+use App\Http\Controllers\Admin\Concerns\HandlesListQuery;
 use App\Http\Controllers\Controller;
 use App\Models\Menu;
 use App\Models\MenuItem;
@@ -10,9 +12,23 @@ use Illuminate\Http\Request;
 
 class MenuController extends Controller
 {
-    public function index()
+    use HandlesBulkActions, HandlesListQuery;
+
+    public function index(Request $request)
     {
-        return view('admin.menus.index', ['menus' => Menu::withCount('items')->get()]);
+        $menus = $this->applyListQuery(
+            Menu::withCount('items'),
+            $request,
+            ['name', 'location'],
+            ['name', 'location', 'created_at'],
+        )->paginate(12)->withQueryString();
+
+        return view('admin.menus.index', compact('menus'));
+    }
+
+    public function bulk(Request $request)
+    {
+        return $this->runBulkAction($request, Menu::class, 'menus');
     }
 
     public function create()

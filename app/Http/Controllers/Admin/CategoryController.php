@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\HandlesBulkActions;
+use App\Http\Controllers\Admin\Concerns\HandlesListQuery;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
@@ -10,12 +12,25 @@ use Illuminate\Validation\Rule;
 
 class CategoryController extends Controller
 {
-    public function index()
+    use HandlesBulkActions, HandlesListQuery;
+
+    public function index(Request $request)
     {
-        $categories = Category::with('parent')->withCount('posts')->latest()->get();
+        $categories = $this->applyListQuery(
+            Category::with('parent')->withCount('posts'),
+            $request,
+            ['name'],
+            ['name', 'created_at'],
+        )->paginate(12)->withQueryString();
+
         $parents = Category::pluck('name', 'id');
 
         return view('admin.categories.index', compact('categories', 'parents'));
+    }
+
+    public function bulk(Request $request)
+    {
+        return $this->runBulkAction($request, Category::class, 'categories');
     }
 
     public function store(Request $request)

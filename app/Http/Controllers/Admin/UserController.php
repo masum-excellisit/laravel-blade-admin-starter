@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\HandlesBulkActions;
+use App\Http\Controllers\Admin\Concerns\HandlesListQuery;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UserRequest;
 use App\Models\User;
@@ -12,13 +14,35 @@ use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
+    use HandlesBulkActions, HandlesListQuery;
+
     public function index(Request $request)
     {
-        $users = User::admins()->with('roles')
-            ->when($request->search, fn ($q, $s) => $q->where(fn ($q) => $q->where('name', 'like', "%$s%")->orWhere('email', 'like', "%$s%")))
-            ->latest()->paginate(12)->withQueryString();
+        $users = $this->applyListQuery(
+            User::admins()->with('roles'),
+            $request,
+            ['name', 'email'],
+            ['name', 'email', 'status', 'last_login_at', 'created_at'],
+        )->paginate(12)->withQueryString();
 
         return view('admin.users.index', compact('users'));
+    }
+
+    public function bulk(Request $request)
+    {
+        return $this->runBulkAction($request, User::class, 'users', function ($query, $action, $ids) use ($request) {
+            $query->admins();
+
+            match ($action) {
+                'delete' => tap($query->where('id', '!=', $request->user()->id))->get()->each(function (User $user) use ($request) {
+                    abort_unless($request->user()->can('users.delete'), 403);
+                    $user->delete();
+                }),
+                'activate' => $this->bulkSetStatus($request, $query, 'users', true, 'status'),
+                'deactivate' => $this->bulkSetStatus($request, $query, 'users', false, 'status'),
+                default => abort(422, 'Unknown bulk action.'),
+            };
+        });
     }
 
     public function create()

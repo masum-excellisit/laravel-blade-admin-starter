@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\HandlesBulkActions;
+use App\Http\Controllers\Admin\Concerns\HandlesListQuery;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -10,11 +12,31 @@ use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
 {
-    public function index()
+    use HandlesBulkActions, HandlesListQuery;
+
+    public function index(Request $request)
     {
-        $roles = Role::withCount('users', 'permissions')->get();
+        $roles = $this->applyListQuery(
+            Role::withCount('users', 'permissions'),
+            $request,
+            ['name'],
+            ['name', 'created_at'],
+        )->paginate(12)->withQueryString();
 
         return view('admin.roles.index', compact('roles'));
+    }
+
+    public function bulk(Request $request)
+    {
+        return $this->runBulkAction($request, Role::class, 'roles', function ($query, $action, $ids) use ($request) {
+            match ($action) {
+                'delete' => tap($query->where('name', '!=', 'super-admin'))->get()->each(function (Role $role) use ($request) {
+                    abort_unless($request->user()->can('roles.delete'), 403);
+                    $role->delete();
+                }),
+                default => abort(422, 'Unknown bulk action.'),
+            };
+        });
     }
 
     public function create()

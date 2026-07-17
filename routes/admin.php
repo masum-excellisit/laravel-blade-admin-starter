@@ -39,33 +39,42 @@ Route::middleware('auth')->group(function () {
     Route::put('profile/password', [ProfileController::class, 'password'])->name('profile.password');
 
     Route::middleware('permission:users.view')->group(function () {
+        Route::post('users/bulk', [UserController::class, 'bulk'])->name('users.bulk');
         Route::resource('users', UserController::class)->except('show');
     });
     Route::middleware('permission:customers.view')->group(function () {
+        Route::post('customers/bulk', [CustomerController::class, 'bulk'])->name('customers.bulk');
         Route::resource('customers', CustomerController::class)->except('show');
     });
     Route::middleware('permission:roles.view')->group(function () {
+        Route::post('roles/bulk', [RoleController::class, 'bulk'])->name('roles.bulk');
         Route::resource('roles', RoleController::class)->except('show');
     });
     Route::middleware('permission:permissions.view')->group(function () {
+        Route::post('permissions/bulk', [PermissionController::class, 'bulk'])->name('permissions.bulk');
         Route::resource('permissions', PermissionController::class)->except('show');
     });
     Route::middleware('permission:pages.view')->group(function () {
+        Route::post('pages/bulk', [PageController::class, 'bulk'])->name('pages.bulk');
         Route::resource('pages', PageController::class)->except('show');
     });
     Route::middleware('permission:posts.view')->group(function () {
+        Route::post('posts/bulk', [PostController::class, 'bulk'])->name('posts.bulk');
         Route::resource('posts', PostController::class)->except('show');
     });
     Route::middleware('permission:categories.view')->group(function () {
+        Route::post('categories/bulk', [CategoryController::class, 'bulk'])->name('categories.bulk');
         Route::resource('categories', CategoryController::class)->except('show', 'create', 'edit');
     });
     Route::middleware('permission:menus.view')->group(function () {
+        Route::post('menus/bulk', [MenuController::class, 'bulk'])->name('menus.bulk');
         Route::resource('menus', MenuController::class)->except('show');
         Route::post('menus/{menu}/items', [MenuController::class, 'storeItem'])->name('menus.items.store');
         Route::delete('menu-items/{item}', [MenuController::class, 'destroyItem'])->name('menus.items.destroy');
         Route::post('menus/{menu}/reorder', [MenuController::class, 'reorder'])->name('menus.reorder');
     });
     Route::middleware('permission:media.view')->group(function () {
+        Route::post('media/bulk', [MediaController::class, 'bulk'])->name('media.bulk');
         Route::get('media', [MediaController::class, 'index'])->name('media.index');
         Route::post('media', [MediaController::class, 'store'])->name('media.store');
         Route::delete('media/{medium}', [MediaController::class, 'destroy'])->name('media.destroy');
@@ -73,6 +82,7 @@ Route::middleware('auth')->group(function () {
     Route::post('media/jodit', [MediaController::class, 'jodit'])->name('media.jodit');
 
     Route::middleware('permission:messages.view')->group(function () {
+        Route::post('messages/bulk', [MessageController::class, 'bulk'])->name('messages.bulk');
         Route::get('messages', [MessageController::class, 'index'])->name('messages.index');
         Route::get('messages/{message}', [MessageController::class, 'show'])->name('messages.show');
         Route::delete('messages/{message}', [MessageController::class, 'destroy'])->name('messages.destroy');
