@@ -15,14 +15,11 @@ class PermissionController extends Controller
 
     public function index(Request $request)
     {
-        $permissions = $this->applyListQuery(
-            Permission::query(),
-            $request,
-            ['name'],
-            ['name', 'created_at'],
-        )->paginate(24)->withQueryString();
+        $modules = Permission::orderBy('name')
+            ->get()
+            ->groupBy(fn (Permission $permission) => explode('.', $permission->name)[0]);
 
-        return view('admin.permissions.index', compact('permissions'));
+        return view('admin.permissions.index', compact('modules'));
     }
 
     public function bulk(Request $request)
