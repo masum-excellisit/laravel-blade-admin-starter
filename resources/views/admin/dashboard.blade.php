@@ -1,46 +1,72 @@
 @extends('layouts.admin')
 @section('title', 'Dashboard')
+
+{{--
+    ADMIN DASHBOARD
+    ---------------
+    Every block below is an independent widget. To remove one, delete (or comment
+    out) its @include line — nothing else breaks. To remove the premium styling
+    entirely, drop the @push('styles') block and public/css/admin-dashboard.css.
+    To remove the analytics layer, delete app/Services/DashboardAnalytics.php,
+    resources/views/components/chart/ and the widgets that use them.
+
+        _kpis           KPI cards + sparklines      needs $kpis
+        _quick-actions  create shortcuts            self-contained
+        _trend          growth area chart           needs $trend
+        _content-mix    content donut               needs $contentMix
+        _engagement     inbound bar chart           needs $engagement
+        _system         publishing gauge + env      needs $system
+        _recent-posts   latest posts                needs $recentPosts
+        _recent-users   newest customers            needs $recentUsers
+        _activity       activity timeline           needs $recentActivity
+--}}
+
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('css/admin-dashboard.css') }}">
+@endpush
+
 @section('content')
-<x-page-header title="Dashboard" subtitle="Welcome back, {{ auth()->user()->name }}." />
+@php
+    $hour = now()->hour;
+    $greeting = $hour < 12 ? 'Good morning' : ($hour < 18 ? 'Good afternoon' : 'Good evening');
+@endphp
 
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5 mb-8">
-    @foreach($stats as $stat)
-        @if($stat['can'] === null || auth()->user()->can($stat['can']))
-        <a href="{{ route($stat['route']) }}" class="group relative overflow-hidden rounded-2xl p-6 brand-gradient text-white shadow-lg shadow-primary/20">
-            <div class="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-white/10"></div>
-            <p class="text-sm font-medium text-white/80">{{ $stat['label'] }}</p>
-            <p class="text-4xl font-bold mt-2">{{ $stat['value'] }}</p>
-        </a>
-        @endif
-    @endforeach
-</div>
+{{-- Hero --}}
+<section class="ez-hero">
+    <div class="ez-hero__mesh" aria-hidden="true"></div>
+    <div class="ez-hero__inner">
+        <div>
+            <p class="ez-hero__eyebrow">{{ now()->format('l, j F Y') }}</p>
+            <h1 class="ez-hero__title">{{ $greeting }}, {{ auth()->user()->name }}.</h1>
+            <p class="ez-hero__sub">Here is how {{ $settings['site_name'] ?? config('app.name') }} is doing today.</p>
+        </div>
+        <div class="ez-hero__actions">
+            <a href="{{ url('/') }}" target="_blank" rel="noopener" class="ez-hero__btn is-ghost">
+                <x-icon name="external" class="w-4 h-4" /> View site
+            </a>
+            @can('posts.view')
+                <a href="{{ route('admin.posts.create') }}" class="ez-hero__btn">
+                    <x-icon name="plus" class="w-4 h-4" /> New post
+                </a>
+            @endcan
+        </div>
+    </div>
+</section>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <x-card title="Recent posts">
-        <div class="space-y-3">
-            @forelse($recentPosts as $post)
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="font-medium text-slate-800 dark:text-slate-100">{{ $post->title }}</p>
-                    <p class="text-xs text-slate-400">{{ $post->created_at->diffForHumans() }}</p>
-                </div>
-                <x-badge :color="$post->status === 'published' ? 'green' : 'slate'">{{ $post->status }}</x-badge>
-            </div>
-            @empty<p class="text-sm text-slate-400">No posts yet.</p>@endforelse
-        </div>
-    </x-card>
-    <x-card title="Recent users">
-        <div class="space-y-3">
-            @forelse($recentUsers as $user)
-            <div class="flex items-center gap-3">
-                <span class="h-9 w-9 rounded-full brand-gradient text-white text-xs font-semibold flex items-center justify-center">{{ $user->initials() }}</span>
-                <div>
-                    <p class="font-medium text-slate-800 dark:text-slate-100">{{ $user->name }}</p>
-                    <p class="text-xs text-slate-400">{{ $user->email }}</p>
-                </div>
-            </div>
-            @empty<p class="text-sm text-slate-400">No users yet.</p>@endforelse
-        </div>
-    </x-card>
+@include('admin.dashboard._kpis')
+
+{{-- Spans come from admin-dashboard.css (.ez-md-* / .ez-xl-*); default is full width. --}}
+<div class="ez-grid">
+    <div>@include('admin.dashboard._quick-actions')</div>
+
+    <div class="ez-xl-8">@include('admin.dashboard._trend')</div>
+    <div class="ez-md-6 ez-xl-4">@include('admin.dashboard._content-mix')</div>
+
+    <div class="ez-xl-7">@include('admin.dashboard._engagement')</div>
+    <div class="ez-md-6 ez-xl-5">@include('admin.dashboard._system')</div>
+
+    <div class="ez-md-6 ez-xl-4">@include('admin.dashboard._recent-posts')</div>
+    <div class="ez-md-6 ez-xl-4">@include('admin.dashboard._recent-users')</div>
+    <div class="ez-xl-4">@include('admin.dashboard._activity')</div>
 </div>
 @endsection

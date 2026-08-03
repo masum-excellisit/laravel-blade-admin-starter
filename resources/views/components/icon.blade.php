@@ -16,6 +16,17 @@ $paths = [
     'upload' => 'M12 16V4m0 0L8 8m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2',
     'filter' => 'M4 5h16M7 12h10M10 19h4',
     'check' => 'M5 13l4 4L19 7',
+    'users' => 'M17 20h5v-1a4 4 0 00-3-3.9M9 20H2v-1a5 5 0 015-5h4a5 5 0 015 5v1zM12 7a3 3 0 11-6 0 3 3 0 016 0zm7 1a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z',
+    'pencil' => 'M4 20h4L20 8a2.8 2.8 0 00-4-4L4 16v4zM14 6l4 4',
+    'document' => 'M14 3v5h5M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8l-5-5zM9 13h6M9 17h4',
+    'photo' => 'M3 17l5-5 4 4 3-3 6 6M5 5h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2zm5 4a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z',
+    'inbox' => 'M4 13h4l2 3h4l2-3h4M4 13l2-7h12l2 7v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5z',
+    'bolt' => 'M13 3L5 14h6l-1 7 8-11h-6l1-7z',
+    'clock' => 'M12 7v5l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z',
+    'trend-up' => 'M3 17l6-6 4 4 7-7m0 0h-5m5 0v5',
+    'trend-down' => 'M3 7l6 6 4-4 7 7m0 0h-5m5 0v-5',
+    'server' => 'M5 4h14a2 2 0 012 2v3a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2zm0 9h14a2 2 0 012 2v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a2 2 0 012-2zm2-5h.01M7 17h.01',
+    'sparkles' => 'M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6L12 3zM5 15l.8 2.2L8 18l-2.2.8L5 21l-.8-2.2L2 18l2.2-.8L5 15z',
 ];
 @endphp
 <svg {{ $attributes->merge(['class' => $class]) }} fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $paths[$name] ?? '' }}"/></svg>

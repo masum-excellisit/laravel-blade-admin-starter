@@ -66,12 +66,45 @@ Visit `http://localhost:8000` for the public site and `http://localhost:8000/adm
 | Path | Purpose |
 |------|---------|
 | `public/css/app.css` | Compiled Tailwind + theme utilities |
+| `public/css/admin-dashboard.css` | Dashboard-only premium styling (loaded by the dashboard view alone) |
 | `public/js/app.js` | Alpine helpers (bulk tables, menu drag, Jodit init) |
 | `public/vendor/alpine/` | Alpine.js |
 | `public/vendor/sortablejs/` | SortableJS |
 | `public/vendor/jodit/` | Jodit editor JS/CSS |
 
 Edit those files directly when you need UI/behavior changes. **Node and npm are not used.**
+
+> `public/css/app.css` also contains hand-written component CSS (sidebar scroll, permission
+> cards, table sort icons) that is **not** in `resources/css/app.css`. Regenerating it with a
+> Tailwind CLI would drop those blocks — keep dashboard-scoped styles in
+> `public/css/admin-dashboard.css` instead.
+
+### Admin dashboard
+
+The dashboard is assembled from independent widgets. Every block is one partial in
+`resources/views/admin/dashboard/`, included from `resources/views/admin/dashboard.blade.php`.
+
+| Widget | Partial | Data |
+|--------|---------|------|
+| KPI cards + sparklines | `_kpis` | `$kpis` |
+| Quick actions | `_quick-actions` | self-contained array |
+| Growth chart (30d / 12m) | `_trend` | `$trend` |
+| Content mix donut | `_content-mix` | `$contentMix` |
+| Inbound bar chart | `_engagement` | `$engagement` |
+| Publishing gauge + env | `_system` | `$system` |
+| Recent posts / customers | `_recent-posts`, `_recent-users` | `$recentPosts`, `$recentUsers` |
+| Activity timeline | `_activity` | `$recentActivity` |
+
+**Removing things**
+
+- One widget → delete its `@include` line (and optionally the partial + its method in `app/Services/DashboardAnalytics.php`).
+- All premium styling → drop the `@push('styles')` block and `public/css/admin-dashboard.css`.
+- All charts → delete `resources/views/components/chart/` and the widgets that use them.
+- All analytics → delete `app/Services/DashboardAnalytics.php` and simplify `DashboardController`.
+
+Charts are inline SVG rendered from PHP with Alpine for hover state — no chart library,
+no build step. Aggregates are cached for `DashboardAnalytics::CACHE_TTL` seconds (set it to
+`0` to disable, or call `DashboardAnalytics::flush()` after writes).
 
 ### Seeded logins
 
