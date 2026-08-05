@@ -2,6 +2,7 @@
 
 use App\Models\CmsContent;
 use App\Models\ContentBlock;
+use App\Services\BackupManager;
 use Illuminate\Support\Facades\Storage;
 
 if (! function_exists('cms')) {
@@ -27,6 +28,13 @@ if (! function_exists('cms_image')) {
         }
 
         return Storage::disk('public')->url($path);
+    }
+}
+
+if (! function_exists('human_bytes')) {
+    function human_bytes(float|int $bytes, int $precision = 1): string
+    {
+        return BackupManager::humanBytes($bytes, $precision);
     }
 }
 

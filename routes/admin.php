@@ -1,9 +1,10 @@
 <?php
 
+use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\Auth\LoginController;
 use App\Http\Controllers\Admin\Auth\PasswordResetController;
-use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\BackupController;
+use App\Http\Controllers\Admin\BackupScheduleController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CmsController;
 use App\Http\Controllers\Admin\ContentBlockController;
@@ -182,7 +183,19 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('permission:backups.view')->group(function () {
         Route::get('backups', [BackupController::class, 'index'])->name('backups.index');
-        Route::post('backups/download', [BackupController::class, 'download'])->name('backups.download');
+        Route::post('backups', [BackupController::class, 'store'])->name('backups.store');
+        Route::post('backups/upload', [BackupController::class, 'upload'])->name('backups.upload');
+        Route::post('backups/rescan', [BackupController::class, 'rescan'])->name('backups.rescan');
+        Route::post('backups/prune', [BackupController::class, 'prune'])->name('backups.prune');
+        Route::post('backups/schedules', [BackupScheduleController::class, 'store'])->name('backups.schedules.store');
+        Route::put('backups/schedules/{schedule}', [BackupScheduleController::class, 'update'])->name('backups.schedules.update');
+        Route::post('backups/schedules/{schedule}/toggle', [BackupScheduleController::class, 'toggle'])->name('backups.schedules.toggle');
+        Route::post('backups/schedules/{schedule}/run', [BackupScheduleController::class, 'run'])->name('backups.schedules.run');
+        Route::delete('backups/schedules/{schedule}', [BackupScheduleController::class, 'destroy'])->name('backups.schedules.destroy');
+        Route::get('backups/{backup}/download', [BackupController::class, 'download'])->name('backups.download');
+        Route::post('backups/{backup}/restore', [BackupController::class, 'restore'])->name('backups.restore');
+        Route::post('backups/{backup}/protect', [BackupController::class, 'protect'])->name('backups.protect');
+        Route::delete('backups/{backup}', [BackupController::class, 'destroy'])->name('backups.destroy');
     });
 
     Route::middleware('permission:settings.view')->group(function () {

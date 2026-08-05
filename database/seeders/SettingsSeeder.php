@@ -47,6 +47,8 @@ class SettingsSeeder extends Seeder
             ['cookie', 'cookie_enabled', '1', 'boolean'],
             ['cookie', 'cookie_message', 'We use cookies to improve your browsing experience.', 'textarea'],
             ['cookie', 'cookie_policy_url', '', 'text'],
+            // backups
+            ['backups', 'backup_retention', '10', 'text'],
         ];
 
         foreach ($defaults as [$group, $key, $value, $type]) {
