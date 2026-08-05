@@ -20,7 +20,7 @@
     <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/60">
         <x-table-checkbox :id="$menu->id" />
         <td class="px-4 py-3 font-medium">{{ $menu->name }}</td>
-        <td class="px-4 py-3">@if($menu->location)<x-badge color="indigo">{{ $menu->location }}</x-badge>@else<span class="text-slate-400">—</span>@endif</td>
+        <td class="px-4 py-3">@if($menu->location)<x-badge color="indigo">{{ config('menus.locations.'.$menu->location, $menu->location) }}</x-badge>@else<span class="text-slate-400">—</span>@endif</td>
         <td class="px-4 py-3">{{ $menu->items_count }}</td>
         <td class="px-4 py-3">
             <div class="flex items-center justify-end gap-1">
