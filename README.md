@@ -33,7 +33,7 @@ A reusable **Laravel 12** website + custom **Blade admin panel** starter kit. Cl
 - 🍪 Cookie consent banner + **Analytics** snippets (GA4 / GTM / Plausible) from Settings
 - 🚧 **Maintenance / coming soon** mode from Settings
 - 💾 **Backups** — database / storage / codebase / everything, with restore, download, upload and scheduled auto-backups
-- ⚙️ Settings: General, Theme, Mail, Analytics, Maintenance, Notifications, Cookie
+- ⚙️ Settings: General, Mail, Analytics, Maintenance, Notifications, Cookie
 - 🎨 Fully themeable via CSS variables — reskin per client without touching code
 - ⚡ `php artisan make:admin-module {Name}` scaffolds a complete CRUD module (injected **before Settings**)
 - 📱 Responsive: sidebar drawer, responsive tables/forms, light/dark mode
@@ -137,9 +137,7 @@ The `User` model exposes `admins()` / `customers()` query scopes and `isAdmin()`
 
 ## Theming
 
-Go to **Admin → Settings → Theme** and change the primary/secondary/accent/sidebar colours. They're stored in the DB and rendered as CSS variables in `resources/views/partials/theme.blade.php`, consumed by both the admin panel and the public site — so a client rebrand is a few colour pickers, no code.
-
-To change fonts or base tokens, edit `public/css/app.css`.
+Brand colours are hardcoded as CSS variables in `resources/views/partials/theme.blade.php` and consumed by both the admin panel and the public site. Edit that partial (or `public/css/app.css` for fonts/base tokens) to rebrand.
 
 ## Mail
 

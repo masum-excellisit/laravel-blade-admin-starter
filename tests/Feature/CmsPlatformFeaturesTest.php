@@ -288,6 +288,33 @@ class CmsPlatformFeaturesTest extends TestCase
         $response->assertSee('Please check back soon.');
     }
 
+    public function test_maintenance_mode_shows_for_customers_but_not_admins(): void
+    {
+        Setting::put('maintenance_enabled', '1', 'maintenance', 'boolean');
+        Setting::put('maintenance_headline', 'Scheduled maintenance', 'maintenance');
+
+        $customer = User::factory()->create(['type' => User::TYPE_CUSTOMER]);
+        $admin = User::factory()->create(['type' => User::TYPE_ADMIN]);
+
+        $this->actingAs($customer)->get('/')->assertStatus(503)->assertSee('Scheduled maintenance');
+        $this->actingAs($admin)->get('/')->assertOk();
+    }
+
+    public function test_admin_settings_no_longer_exposes_theme_tab(): void
+    {
+        $this->seed(RolePermissionSeeder::class);
+
+        $admin = User::factory()->create(['type' => User::TYPE_ADMIN]);
+        $admin->assignRole('super-admin');
+
+        $this->actingAs($admin)
+            ->get(route('admin.settings.edit'))
+            ->assertOk()
+            ->assertDontSee('Theme colours')
+            ->assertDontSee('name="theme_primary"', false)
+            ->assertSee('Maintenance');
+    }
+
     public function test_contact_submit_sends_notification_and_auto_reply(): void
     {
         Mail::fake();

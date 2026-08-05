@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"
       x-data="{
-          dark: (localStorage.getItem('theme') || '{{ $settings['theme_mode'] ?? 'light' }}') === 'dark',
+          dark: (localStorage.getItem('theme') || 'light') === 'dark',
           sidebar: false,
           collapsed: localStorage.getItem('sidebar_collapsed') === '1'
       }"

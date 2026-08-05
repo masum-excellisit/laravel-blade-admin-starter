@@ -2,9 +2,9 @@
 @section('title', 'Settings')
 @section('content')
 <div x-data="{ tab: 'general' }">
-<x-page-header title="Settings" subtitle="Configure your site, mail, theme, analytics, maintenance, and privacy options." />
+<x-page-header title="Settings" subtitle="Configure your site, mail, analytics, maintenance, and privacy options." />
 <div class="flex gap-2 mb-6 border-b border-slate-200 dark:border-slate-700">
-    @foreach(['general'=>'General','theme'=>'Theme','mail'=>'Mail','analytics'=>'Analytics','maintenance'=>'Maintenance','notifications'=>'Notifications','cookie'=>'Cookie'] as $key=>$label)
+    @foreach(['general'=>'General','mail'=>'Mail','analytics'=>'Analytics','maintenance'=>'Maintenance','notifications'=>'Notifications','cookie'=>'Cookie'] as $key=>$label)
     <button x-on:click="tab='{{ $key }}'" :class="tab==='{{ $key }}' ? 'border-primary text-primary' : 'border-transparent text-slate-500'" class="px-4 py-2.5 -mb-px border-b-2 font-medium text-sm">{{ $label }}</button>
     @endforeach
 </div>
@@ -31,22 +31,6 @@
                 <x-form.input name="social_github" label="GitHub" :value="$general['social_github'] ?? ''" />
                 <x-form.input name="social_linkedin" label="LinkedIn" :value="$general['social_linkedin'] ?? ''" />
             </div>
-        </x-card>
-    </div>
-
-    <!-- THEME -->
-    <div x-show="tab==='theme'" x-cloak class="max-w-2xl">
-        <x-card title="Theme colours">
-            <div class="grid grid-cols-2 gap-5">
-                @foreach(['theme_primary'=>'Primary','theme_secondary'=>'Secondary','theme_accent'=>'Accent','theme_sidebar'=>'Sidebar'] as $k=>$l)
-                <div>
-                    <x-form.label>{{ $l }}</x-form.label>
-                    <input type="color" name="{{ $k }}" value="{{ $theme[$k] ?? '#6366f1' }}" class="h-11 w-full rounded-xl border border-slate-300 dark:border-slate-600">
-                </div>
-                @endforeach
-                <x-form.select name="theme_mode" label="Default mode" :options="['light'=>'Light','dark'=>'Dark']" :selected="$theme['theme_mode'] ?? 'light'" />
-            </div>
-            <p class="mt-4 text-xs text-slate-400">Colours drive CSS variables across both the admin panel and public site.</p>
         </x-card>
     </div>
 

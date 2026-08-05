@@ -34,14 +34,6 @@ class CheckMaintenanceMode
     {
         $user = $request->user();
 
-        if (! $user) {
-            return false;
-        }
-
-        if (method_exists($user, 'isAdmin') && $user->isAdmin()) {
-            return true;
-        }
-
-        return method_exists($user, 'roles') && $user->roles()->exists();
+        return $user && method_exists($user, 'isAdmin') && $user->isAdmin();
     }
 }
