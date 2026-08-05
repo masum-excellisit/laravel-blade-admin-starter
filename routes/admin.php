@@ -117,6 +117,7 @@ Route::middleware('auth')->group(function () {
         Route::post('menus/bulk', [MenuController::class, 'bulk'])->name('menus.bulk');
         Route::resource('menus', MenuController::class)->except('show');
         Route::post('menus/{menu}/items', [MenuController::class, 'storeItem'])->name('menus.items.store');
+        Route::put('menu-items/{item}', [MenuController::class, 'updateItem'])->name('menus.items.update');
         Route::delete('menu-items/{item}', [MenuController::class, 'destroyItem'])->name('menus.items.destroy');
         Route::post('menus/{menu}/reorder', [MenuController::class, 'reorder'])->name('menus.reorder');
     });
