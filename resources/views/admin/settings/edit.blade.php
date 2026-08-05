@@ -17,9 +17,9 @@
                 <x-form.input name="site_name" label="Site name" :value="$general['site_name'] ?? ''" />
                 <x-form.textarea name="site_tagline" label="Tagline" :value="$general['site_tagline'] ?? ''" rows="2" />
                 <x-form.image name="site_logo" label="Logo" rounded="rounded-xl"
-                    :current="($general['site_logo'] ?? false) ? \Illuminate\Support\Facades\Storage::disk('public')->url($general['site_logo']) : ''" />
+                    :current="filled($general['site_logo'] ?? null) ? \Illuminate\Support\Facades\Storage::disk('public')->url($general['site_logo']) : ''" />
                 <x-form.image name="site_favicon" label="Favicon" rounded="rounded-lg"
-                    :current="($general['site_favicon'] ?? false) ? \Illuminate\Support\Facades\Storage::disk('public')->url($general['site_favicon']) : ''" />
+                    :current="filled($general['site_favicon'] ?? null) ? \Illuminate\Support\Facades\Storage::disk('public')->url($general['site_favicon']) : ''" />
             </div>
         </x-card>
         <x-card title="Contact & social">

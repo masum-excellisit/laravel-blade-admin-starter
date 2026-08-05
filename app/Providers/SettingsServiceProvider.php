@@ -15,16 +15,23 @@ class SettingsServiceProvider extends ServiceProvider
         // super-admin bypasses all permission checks
         Gate::before(fn ($user, $ability) => $user->hasRole('super-admin') ? true : null);
 
-        if ($this->missingSettingsTable()) {
-            View::share('settings', []);
+        View::composer('*', function ($view): void {
+            $settings = $this->settings();
+            $view->with('settings', $settings);
+        });
 
-            return;
+        if (! $this->missingSettingsTable()) {
+            $this->applyMailConfig($this->settings());
+        }
+    }
+
+    protected function settings(): array
+    {
+        if ($this->missingSettingsTable()) {
+            return [];
         }
 
-        $settings = Setting::all_cached();
-        View::share('settings', $settings);
-
-        $this->applyMailConfig($settings);
+        return Setting::all_cached();
     }
 
     protected function missingSettingsTable(): bool

@@ -355,6 +355,46 @@ class CmsPlatformFeaturesTest extends TestCase
             ->assertSee(basename($faviconPath), false);
     }
 
+    public function test_site_logo_and_favicon_appear_on_public_and_admin_pages(): void
+    {
+        Storage::fake('public');
+
+        $logoPath = UploadedFile::fake()->image('brand-logo.png', 200, 80)->store('branding', 'public');
+        $faviconPath = UploadedFile::fake()->image('brand-favicon.png', 32, 32)->store('branding', 'public');
+
+        Setting::put('site_name', 'Branded Site', 'general');
+        Setting::put('site_logo', $logoPath, 'general', 'image');
+        Setting::put('site_favicon', $faviconPath, 'general', 'image');
+
+        $logoUrl = Storage::disk('public')->url($logoPath);
+        $faviconUrl = Storage::disk('public')->url($faviconPath);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('rel="icon"', false)
+            ->assertSee($faviconUrl, false)
+            ->assertSee($logoUrl, false);
+
+        $this->seed(RolePermissionSeeder::class);
+        $admin = User::factory()->create(['type' => User::TYPE_ADMIN]);
+        $admin->assignRole('super-admin');
+
+        $this->actingAs($admin)
+            ->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertSee('rel="icon"', false)
+            ->assertSee($faviconUrl, false)
+            ->assertSee($logoUrl, false);
+
+        auth()->logout();
+
+        $this->get(route('admin.login'))
+            ->assertOk()
+            ->assertSee('rel="icon"', false)
+            ->assertSee($faviconUrl, false)
+            ->assertSee($logoUrl, false);
+    }
+
     public function test_contact_submit_sends_notification_and_auto_reply(): void
     {
         Mail::fake();
