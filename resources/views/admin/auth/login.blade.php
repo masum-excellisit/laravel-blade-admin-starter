@@ -2,7 +2,11 @@
 @section('title', 'Sign in')
 @section('content')
 <div class="lg:hidden mb-10 flex flex-col items-center gap-3">
-    <span class="h-14 w-14 rounded-2xl brand-gradient flex items-center justify-center text-white text-2xl shadow-lg">◆</span>
+    @if(filled($settings['site_logo'] ?? null))
+        <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($settings['site_logo']) }}" alt="" class="h-14 w-auto">
+    @else
+        <span class="h-14 w-14 rounded-2xl brand-gradient flex items-center justify-center text-white text-2xl shadow-lg">◆</span>
+    @endif
     <h1 class="text-xl font-bold">{{ $settings['site_name'] ?? config('app.name') }}</h1>
 </div>
 <form method="POST" action="{{ route('admin.login.attempt') }}" class="space-y-5">

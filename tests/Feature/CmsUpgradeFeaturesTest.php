@@ -2,8 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Models\Backup;
 use App\Models\Media;
 use App\Models\User;
+use App\Services\BackupManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -64,11 +66,20 @@ class CmsUpgradeFeaturesTest extends TestCase
 
     public function test_backup_download_returns_successful_response_for_admin(): void
     {
-        $response = $this->actingAs($this->admin())
-            ->post('/admin/backups/download');
+        $admin = $this->admin();
+
+        $this->actingAs($admin)
+            ->post('/admin/backups', ['type' => 'database'])
+            ->assertRedirect();
+
+        $backup = Backup::firstOrFail();
+
+        $response = $this->actingAs($admin)->get('/admin/backups/'.$backup->id.'/download');
 
         $response->assertOk();
         $response->assertHeader('content-disposition');
+
+        app(BackupManager::class)->delete($backup);
     }
 
     protected function admin(): User

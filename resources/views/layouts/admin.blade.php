@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"
       x-data="{
-          dark: (localStorage.getItem('theme') || '{{ $settings['theme_mode'] ?? 'light' }}') === 'dark',
+          dark: (localStorage.getItem('theme') || 'light') === 'dark',
           sidebar: false,
           collapsed: localStorage.getItem('sidebar_collapsed') === '1'
       }"
@@ -13,6 +13,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin') · {{ $settings['site_name'] ?? config('app.name') }}</title>
+    @include('partials.favicon')
     @include('partials.theme')
     @include('partials.assets')
 </head>
@@ -27,7 +28,11 @@
         <div class="h-16 flex items-center px-5 shrink-0 border-b border-white/10 overflow-hidden">
             <div x-show="!collapsed" x-cloak><x-app-logo :dark="true" /></div>
             <div x-show="collapsed" x-cloak class="mx-auto">
-                <span class="h-9 w-9 rounded-xl brand-gradient flex items-center justify-center text-white text-lg shadow-lg">◆</span>
+                @if(filled($settings['site_logo'] ?? null))
+                    <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($settings['site_logo']) }}" alt="" class="h-9 w-9 rounded-xl object-contain">
+                @else
+                    <span class="h-9 w-9 rounded-xl brand-gradient flex items-center justify-center text-white text-lg shadow-lg">◆</span>
+                @endif
             </div>
         </div>
         <div class="admin-sidebar-scroll-shell"

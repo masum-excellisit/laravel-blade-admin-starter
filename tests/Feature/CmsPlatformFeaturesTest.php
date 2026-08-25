@@ -26,7 +26,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -286,6 +288,111 @@ class CmsPlatformFeaturesTest extends TestCase
         $response->assertStatus(503);
         $response->assertSee('Scheduled maintenance');
         $response->assertSee('Please check back soon.');
+    }
+
+    public function test_maintenance_mode_shows_for_customers_but_not_admins(): void
+    {
+        Setting::put('maintenance_enabled', '1', 'maintenance', 'boolean');
+        Setting::put('maintenance_headline', 'Scheduled maintenance', 'maintenance');
+
+        $customer = User::factory()->create(['type' => User::TYPE_CUSTOMER]);
+        $admin = User::factory()->create(['type' => User::TYPE_ADMIN]);
+
+        $this->actingAs($customer)->get('/')->assertStatus(503)->assertSee('Scheduled maintenance');
+        $this->actingAs($admin)->get('/')->assertOk();
+    }
+
+    public function test_admin_settings_no_longer_exposes_theme_tab(): void
+    {
+        $this->seed(RolePermissionSeeder::class);
+
+        $admin = User::factory()->create(['type' => User::TYPE_ADMIN]);
+        $admin->assignRole('super-admin');
+
+        $this->actingAs($admin)
+            ->get(route('admin.settings.edit'))
+            ->assertOk()
+            ->assertDontSee('Theme colours')
+            ->assertDontSee('name="theme_primary"', false)
+            ->assertSee('Maintenance');
+    }
+
+    public function test_admin_settings_stores_logo_and_favicon_uploads(): void
+    {
+        Storage::fake('public');
+        $this->seed(RolePermissionSeeder::class);
+        $this->seed(SettingsSeeder::class);
+
+        $admin = User::factory()->create(['type' => User::TYPE_ADMIN]);
+        $admin->assignRole('super-admin');
+
+        $logo = UploadedFile::fake()->image('logo.png', 200, 80);
+        $favicon = UploadedFile::fake()->image('favicon.png', 32, 32);
+
+        $this->actingAs($admin)
+            ->put(route('admin.settings.update'), [
+                'site_name' => 'Blade Admin Starter',
+                'site_logo' => $logo,
+                'site_favicon' => $favicon,
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $logoPath = Setting::get('site_logo');
+        $faviconPath = Setting::get('site_favicon');
+
+        $this->assertNotEmpty($logoPath);
+        $this->assertNotEmpty($faviconPath);
+        $this->assertTrue(Storage::disk('public')->exists($logoPath));
+        $this->assertTrue(Storage::disk('public')->exists($faviconPath));
+        $this->assertStringStartsWith('branding/', $logoPath);
+        $this->assertStringStartsWith('branding/', $faviconPath);
+
+        $this->actingAs($admin)
+            ->get(route('admin.settings.edit'))
+            ->assertOk()
+            ->assertSee(basename($logoPath), false)
+            ->assertSee(basename($faviconPath), false);
+    }
+
+    public function test_site_logo_and_favicon_appear_on_public_and_admin_pages(): void
+    {
+        Storage::fake('public');
+
+        $logoPath = UploadedFile::fake()->image('brand-logo.png', 200, 80)->store('branding', 'public');
+        $faviconPath = UploadedFile::fake()->image('brand-favicon.png', 32, 32)->store('branding', 'public');
+
+        Setting::put('site_name', 'Branded Site', 'general');
+        Setting::put('site_logo', $logoPath, 'general', 'image');
+        Setting::put('site_favicon', $faviconPath, 'general', 'image');
+
+        $logoUrl = Storage::disk('public')->url($logoPath);
+        $faviconUrl = Storage::disk('public')->url($faviconPath);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('rel="icon"', false)
+            ->assertSee($faviconUrl, false)
+            ->assertSee($logoUrl, false);
+
+        $this->seed(RolePermissionSeeder::class);
+        $admin = User::factory()->create(['type' => User::TYPE_ADMIN]);
+        $admin->assignRole('super-admin');
+
+        $this->actingAs($admin)
+            ->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertSee('rel="icon"', false)
+            ->assertSee($faviconUrl, false)
+            ->assertSee($logoUrl, false);
+
+        auth()->logout();
+
+        $this->get(route('admin.login'))
+            ->assertOk()
+            ->assertSee('rel="icon"', false)
+            ->assertSee($faviconUrl, false)
+            ->assertSee($logoUrl, false);
     }
 
     public function test_contact_submit_sends_notification_and_auto_reply(): void

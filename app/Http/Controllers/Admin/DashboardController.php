@@ -3,26 +3,20 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\ContactMessage;
-use App\Models\Page;
+use App\Models\ActivityLog;
 use App\Models\Post;
 use App\Models\User;
+use App\Services\DashboardAnalytics;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(DashboardAnalytics $analytics)
     {
-        $stats = [
-            ['label' => 'Users', 'value' => User::customers()->count(), 'route' => 'admin.customers.index', 'can' => 'customers.view'],
-            ['label' => 'Admin Users', 'value' => User::admins()->count(), 'route' => 'admin.users.index', 'can' => 'users.view'],
-            ['label' => 'Pages', 'value' => Page::count(), 'route' => 'admin.pages.index', 'can' => 'pages.view'],
-            ['label' => 'Posts', 'value' => Post::count(), 'route' => 'admin.posts.index', 'can' => 'posts.view'],
-            ['label' => 'Messages', 'value' => ContactMessage::where('read', false)->count(), 'route' => 'admin.messages.index', 'can' => 'messages.view'],
-        ];
-
-        $recentPosts = Post::latest()->take(5)->get();
-        $recentUsers = User::customers()->latest()->take(5)->get();
-
-        return view('admin.dashboard', compact('stats', 'recentPosts', 'recentUsers'));
+        // $analytics->all() supplies $kpis, $trend, $contentMix, $engagement, $system.
+        return view('admin.dashboard', $analytics->all() + [
+            'recentPosts' => Post::latest()->take(6)->get(),
+            'recentUsers' => User::customers()->latest()->take(6)->get(),
+            'recentActivity' => ActivityLog::with('user')->latest()->take(8)->get(),
+        ]);
     }
 }

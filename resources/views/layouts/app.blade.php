@@ -8,6 +8,7 @@
     <meta name="description" content="@yield('meta_description', $settings['site_tagline'] ?? '')">
     @endif
     @stack('meta')
+    @include('partials.favicon')
     @include('partials.theme')
     @include('partials.assets')
     @include('partials.analytics')

@@ -21,12 +21,6 @@ class SettingsSeeder extends Seeder
             ['general', 'social_twitter', 'https://twitter.com', 'text'],
             ['general', 'social_github', 'https://github.com', 'text'],
             ['general', 'social_linkedin', 'https://linkedin.com', 'text'],
-            // theme
-            ['theme', 'theme_primary', '#6366f1', 'color'],
-            ['theme', 'theme_secondary', '#8b5cf6', 'color'],
-            ['theme', 'theme_accent', '#ec4899', 'color'],
-            ['theme', 'theme_sidebar', '#0f172a', 'color'],
-            ['theme', 'theme_mode', 'light', 'text'],
             // mail
             ['mail', 'mail_host', '', 'text'],
             ['mail', 'mail_port', '587', 'text'],
@@ -47,6 +41,8 @@ class SettingsSeeder extends Seeder
             ['cookie', 'cookie_enabled', '1', 'boolean'],
             ['cookie', 'cookie_message', 'We use cookies to improve your browsing experience.', 'textarea'],
             ['cookie', 'cookie_policy_url', '', 'text'],
+            // backups
+            ['backups', 'backup_retention', '10', 'text'],
         ];
 
         foreach ($defaults as [$group, $key, $value, $type]) {
