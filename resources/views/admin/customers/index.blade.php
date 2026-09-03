@@ -1,9 +1,9 @@
 @extends('layouts.admin')
-@section('title', 'Users')
+@section('title', 'Customers')
 @section('content')
-<x-page-header title="Users" subtitle="Customer accounts (front-end users).">
+<x-page-header title="Customers" subtitle="Customer accounts (front-end users).">
     <x-slot:actions>
-        @can('customers.create')<x-btn :href="route('admin.customers.create')"><x-icon name="plus" class="w-4 h-4" /> New user</x-btn>@endcan
+        @can('customers.create')<x-btn :href="route('admin.customers.create')"><x-icon name="plus" class="w-4 h-4" /> New customer</x-btn>@endcan
     </x-slot:actions>
 </x-page-header>
 
@@ -52,7 +52,14 @@
         </td>
     </tr>
     @empty
-    <tr><td colspan="7" class="px-4 py-12 text-center text-slate-400">No customers found.</td></tr>
+    <tr><td colspan="7" class="px-4 py-12 text-center text-slate-400">
+        @if(request()->filled('search') || request()->filled('status'))
+            <p class="font-medium text-slate-500">No customers match your filters.</p>
+            <div class="mt-4"><x-btn :href="route('admin.customers.index')" variant="outline" size="sm">Clear filters</x-btn></div>
+        @else
+            No customers found.
+        @endif
+    </td></tr>
     @endforelse
 </x-table>
 {{ $customers->links() }}
