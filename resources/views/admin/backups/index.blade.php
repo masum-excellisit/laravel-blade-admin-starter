@@ -1,4 +1,1 @@
-@extends('layouts.admin')
-@section('title', 'Backups')
-@section('content')
-PLACEHOLDER_WILL_REPLACE
+PLACEHOLDER_REPLACE_ME_WITH_FULL_CONTENT
