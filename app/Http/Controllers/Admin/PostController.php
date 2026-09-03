@@ -55,7 +55,6 @@ class PostController extends Controller
         }
         $post = Post::create($data);
 
-        Activity::log('created', $post, 'Post created');
 
         return redirect()->route('admin.posts.index')->with('success', 'Post created.');
     }
@@ -85,7 +84,6 @@ class PostController extends Controller
             if (($data['featured_image'] ?? null) && $oldImage) {
                 Storage::disk('public')->delete($oldImage);
             }
-            Activity::log('updated', $post, 'Post updated');
         }
 
         return redirect()->route('admin.posts.index')->with('success', 'Post updated.');
@@ -94,7 +92,6 @@ class PostController extends Controller
     public function destroy(Request $request, Post $post)
     {
         abort_unless($request->user()->can('posts.delete'), 403);
-        Activity::log('deleted', $post, 'Post deleted', ['title' => $post->title]);
         $post->delete();
 
         return back()->with('success', 'Post deleted.');

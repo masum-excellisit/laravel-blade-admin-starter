@@ -50,7 +50,6 @@ class PageController extends Controller
         abort_unless($request->user()->can('pages.create'), 403);
         $page = Page::create($request->validated());
 
-        Activity::log('created', $page, 'Page created');
 
         return redirect()->route('admin.pages.index')->with('success', 'Page created.');
     }
@@ -72,7 +71,6 @@ class PageController extends Controller
         if ($page->isDirty()) {
             $page->recordRevision('before update');
             $page->save();
-            Activity::log('updated', $page, 'Page updated');
         }
 
         return redirect()->route('admin.pages.index')->with('success', 'Page updated.');
@@ -81,7 +79,6 @@ class PageController extends Controller
     public function destroy(Request $request, Page $page)
     {
         abort_unless($request->user()->can('pages.delete'), 403);
-        Activity::log('deleted', $page, 'Page deleted', ['title' => $page->title]);
         $page->delete();
 
         return back()->with('success', 'Page deleted.');
