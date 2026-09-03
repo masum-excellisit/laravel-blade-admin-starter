@@ -3,89 +3,80 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Activity;
 use App\Models\CmsContent;
 use App\Models\Revision;
-use App\Support\Activity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 class CmsController extends Controller
 {
-    public function index(Request $request)
+    public function edit(string $page)
     {
-        abort_unless($request->user()->can('cms.view'), 403);
+        abort_unless(auth()->user()->can('cms.view'), 403);
 
-        $pages = collect(config('cms.pages', []))
-            ->map(fn (array $config, string $key) => [
-                'key' => $key,
-                'title' => $config['title'],
-            ])
-            ->values();
+        $schema = config("cms.pages.{$page}");
+        abort_unless($schema, 404);
 
-        return view('admin.cms.index', compact('pages'));
-    }
+        $contents = CmsContent::query()
+            ->where('page', $page)
+            ->get()
+            ->keyBy('section');
 
-    public function edit(Request $request, string $page)
-    {
-        abort_unless($request->user()->can('cms.view'), 403);
+        $revisions = Revision::query()
+            ->where('revisionable_type', CmsContent::class)
+            ->whereIn('revisionable_id', $contents->pluck('id'))
+            ->with('user:id,name')
+            ->latest()
+            ->limit(30)
+            ->get();
 
-        $pageConfig = config("cms.pages.{$page}");
-        abort_if(! $pageConfig, 404);
-
-        $sections = $pageConfig['sections'];
-        $content = [];
-
-        foreach (array_keys($sections) as $sectionKey) {
-            $content[$sectionKey] = CmsContent::getSection($page, $sectionKey);
-        }
-
-        return view('admin.cms.edit', [
-            'page' => $page,
-            'pageTitle' => $pageConfig['title'],
-            'sections' => $sections,
-            'content' => $content,
-        ]);
+        return view('admin.cms.edit', compact('page', 'schema', 'contents', 'revisions'));
     }
 
     public function update(Request $request, string $page)
     {
         abort_unless($request->user()->can('cms.edit'), 403);
 
-        $pageConfig = config("cms.pages.{$page}");
-        abort_if(! $pageConfig, 404);
+        $schema = config("cms.pages.{$page}");
+        abort_unless($schema, 404);
 
-        $rules = $this->buildValidationRules($pageConfig['sections']);
-        $validated = $request->validate($rules);
+        $payload = $request->input('sections', []);
+        if (! is_array($payload)) {
+            throw ValidationException::withMessages(['sections' => 'Invalid CMS payload.']);
+        }
+
         $changed = false;
 
-        foreach ($pageConfig['sections'] as $sectionKey => $sectionConfig) {
-            $sectionInput = $validated['sections'][$sectionKey] ?? [];
+        foreach ($schema['sections'] as $sectionKey => $section) {
+            $sectionData = $payload[$sectionKey] ?? [];
+            if (! is_array($sectionData)) {
+                $sectionData = [];
+            }
+
             $existing = CmsContent::query()
                 ->where('page', $page)
                 ->where('section', $sectionKey)
                 ->first();
-            $existingData = $existing?->data ?? [];
-            $sectionData = [];
 
-            foreach ($sectionConfig['fields'] as $field) {
-                $fieldKey = $field['key'];
-                $fileKey = "sections.{$sectionKey}.{$fieldKey}";
-                $existingKey = "sections.{$sectionKey}.{$fieldKey}_existing";
+            $current = is_array($existing?->data) ? $existing->data : [];
 
-                if ($field['type'] === 'image') {
-                    if ($request->hasFile($fileKey)) {
-                        $oldPath = $existingData[$fieldKey] ?? null;
-                        if ($oldPath) {
-                            Storage::disk('public')->delete($oldPath);
-                        }
-                        $sectionData[$fieldKey] = $request->file($fileKey)->store('cms', 'public');
-                    } elseif ($request->filled($existingKey)) {
-                        $sectionData[$fieldKey] = $request->input($existingKey);
-                    } else {
-                        $sectionData[$fieldKey] = $existingData[$fieldKey] ?? null;
+            foreach ($section['fields'] as $fieldKey => $field) {
+                if (($field['type'] ?? 'text') !== 'image') {
+                    continue;
+                }
+
+                $upload = $request->file("sections.{$sectionKey}.{$fieldKey}");
+                if ($upload) {
+                    $path = $upload->store('cms', 'public');
+                    $old = $current[$fieldKey] ?? null;
+                    if (is_string($old) && $old !== '' && $old !== $path) {
+                        Storage::disk('public')->delete($old);
                     }
+                    $sectionData[$fieldKey] = $path;
                 } else {
-                    $sectionData[$fieldKey] = $sectionInput[$fieldKey] ?? null;
+                    $sectionData[$fieldKey] = $current[$fieldKey] ?? ($sectionData[$fieldKey] ?? null);
                 }
             }
 
@@ -103,9 +94,6 @@ class CmsController extends Controller
         }
 
         CmsContent::forgetPageCache($page);
-
-        if ($changed) {
-        }
 
         return redirect()
             ->route('admin.cms.edit', $page)
@@ -127,37 +115,24 @@ class CmsController extends Controller
             'revision_id' => $revision->id,
         ]);
 
-        return redirect()->route('admin.cms.edit', $page)->with('success', 'CMS revision restored.');
+        return back()->with('success', 'Revision restored.');
     }
 
-    /**
-     * @param  array<string, array{label: string, fields: array<int, array{key: string, type: string, label: string}>}>  $sections
-     * @return array<string, mixed>
-     */
-    protected function buildValidationRules(array $sections): array
+    public function preview(string $page)
     {
-        $rules = ['sections' => ['required', 'array']];
+        abort_unless(auth()->user()->can('cms.view'), 403);
+        abort_unless(config("cms.pages.{$page}"), 404);
 
-        foreach ($sections as $sectionKey => $sectionConfig) {
-            $rules["sections.{$sectionKey}"] = ['array'];
+        $map = [
+            'home' => '/',
+            'about' => '/about',
+            'services' => '/services',
+            'contact' => '/contact',
+            'careers' => '/careers',
+        ];
 
-            foreach ($sectionConfig['fields'] as $field) {
-                $fieldKey = $field['key'];
-                $fieldRules = match ($field['type']) {
-                    'text' => ['nullable', 'string', 'max:255'],
-                    'textarea', 'richtext' => ['nullable', 'string'],
-                    'url' => ['nullable', 'string', 'max:2048', 'url'],
-                    'image' => ['nullable', 'image', 'max:4096'],
-                    default => ['nullable', 'string'],
-                };
+        $path = $map[$page] ?? '/';
 
-                $rules["sections.{$sectionKey}.{$fieldKey}"] = $fieldRules;
-                if ($field['type'] === 'image') {
-                    $rules["sections.{$sectionKey}.{$fieldKey}_existing"] = ['nullable', 'string', 'max:500'];
-                }
-            }
-        }
-
-        return $rules;
+        return redirect()->to($path.'?cms_preview=1');
     }
 }
