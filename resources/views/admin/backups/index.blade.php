@@ -24,3 +24,5 @@
     $label = 'block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5';
     $activeSchedules = $schedules->where('is_active', true)->count();
 @endphp
+@include('admin.backups._part_a')
+@include('admin.backups._part_b')
