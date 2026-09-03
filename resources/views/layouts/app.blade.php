@@ -61,6 +61,8 @@
 
 <main>@yield('content')</main>
 
+@include('partials.cookie-banner')
+
 <footer class="bg-slate-900 text-slate-300 mt-24">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-14 grid grid-cols-1 md:grid-cols-3 gap-10">
         <div>
@@ -81,7 +83,6 @@
     <div class="border-t border-white/10 py-5 text-center text-xs text-slate-500">&copy; {{ date('Y') }} {{ $settings['site_name'] ?? config('app.name') }}. All rights reserved.</div>
 </footer>
 <x-flash />
-@include('partials.cookie-banner')
 @include('partials.assets-scripts')
 </body>
 </html>
