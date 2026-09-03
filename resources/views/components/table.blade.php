@@ -23,8 +23,8 @@
         {{ $toolbar }}
     @endif
 
-    <div class="overflow-x-auto rounded-2xl border border-slate-200/70 dark:border-slate-700/60">
-        <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700 text-sm">
+    <div class="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 rounded-2xl border border-slate-200/70 dark:border-slate-700/60">
+        <table class="min-w-[720px] w-full divide-y divide-slate-200 dark:divide-slate-700 text-sm">
             @if(count($columns))
             <thead class="bg-slate-50 dark:bg-slate-800/80">
                 <tr>

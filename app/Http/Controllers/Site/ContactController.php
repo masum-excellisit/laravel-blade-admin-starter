@@ -30,11 +30,6 @@ class ContactController extends Controller
 
         $message = ContactMessage::create($data);
 
-        Activity::log('created', $message, 'Contact message submitted', [
-            'email' => $message->email,
-            'subject' => $message->subject,
-        ]);
-
         $this->sendNotification($message);
         $this->sendAutoReply($message);
 

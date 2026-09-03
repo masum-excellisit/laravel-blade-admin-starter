@@ -56,17 +56,30 @@
      @menu-edit="startEditById($event.detail)">
     <div class="lg:col-span-2 space-y-6">
         <x-card title="Menu items">
-            <p class="text-sm text-slate-500 mb-4">Drag the handle to change order. Changes save automatically.</p>
+            <p class="text-sm text-slate-500 mb-4">Drag the handle to reorder, or use the up/down buttons. Changes save automatically.</p>
             <div x-data="sortableMenu(@js(route('admin.menus.reorder', $menu)))">
+                <p class="sr-only" aria-live="polite" x-text="saving ? 'Saving order…' : ''"></p>
                 <div x-ref="list" class="space-y-2">
                     @forelse($menu->rootItems as $item)
                     <div data-item-id="{{ $item->id }}"
                          class="flex items-start gap-3 px-3 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/60 shadow-sm">
-                        <button type="button" data-drag-handle
-                                class="cursor-grab active:cursor-grabbing p-1.5 mt-0.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
-                                title="Drag to reorder" aria-label="Drag to reorder">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M7 4a1 1 0 11-2 0 1 1 0 012 0zm0 6a1 1 0 11-2 0 1 1 0 012 0zm0 6a1 1 0 11-2 0 1 1 0 012 0zm8-12a1 1 0 11-2 0 1 1 0 012 0zm0 6a1 1 0 11-2 0 1 1 0 012 0zm0 6a1 1 0 11-2 0 1 1 0 012 0z"/></svg>
-                        </button>
+                        <div class="flex flex-col items-center gap-0.5 mt-0.5">
+                            <button type="button" data-drag-handle draggable="true"
+                                    class="cursor-grab active:cursor-grabbing p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
+                                    title="Drag to reorder" aria-label="Drag to reorder">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M7 4a1 1 0 11-2 0 1 1 0 012 0zm0 6a1 1 0 11-2 0 1 1 0 012 0zm0 6a1 1 0 11-2 0 1 1 0 012 0zm8-12a1 1 0 11-2 0 1 1 0 012 0zm0 6a1 1 0 11-2 0 1 1 0 012 0zm0 6a1 1 0 11-2 0 1 1 0 012 0z"/></svg>
+                            </button>
+                            @can('menus.edit')
+                            <button type="button" class="p-1 rounded text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700" title="Move up" aria-label="Move up"
+                                    x-on:click="move($el.closest('[data-item-id]'), -1)">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
+                            </button>
+                            <button type="button" class="p-1 rounded text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700" title="Move down" aria-label="Move down"
+                                    x-on:click="move($el.closest('[data-item-id]'), 1)">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                            @endcan
+                        </div>
                         <div class="flex-1 min-w-0">
                             <p class="font-medium truncate">{{ $item->label }}</p>
                             <p class="text-xs text-slate-400 truncate">{{ $item->type }} · {{ $item->value }}</p>
