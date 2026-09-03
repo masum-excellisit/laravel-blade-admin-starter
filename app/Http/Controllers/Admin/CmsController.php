@@ -104,10 +104,6 @@ class CmsController extends Controller
 
         CmsContent::forgetPageCache($page);
 
-        if ($changed) {
-            Activity::log('updated', null, 'CMS page content updated', ['page' => $page]);
-        }
-
         return redirect()
             ->route('admin.cms.edit', $page)
             ->with('success', 'Page content updated.');
