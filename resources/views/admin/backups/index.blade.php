@@ -726,7 +726,7 @@
 
                 <div>
                     <label class="{{ $label }}">How often</label>
-                    <select name="frequency" x-model="form.form.frequency" class="{{ $input }}">
+                    <select name="frequency" x-model="form.frequency" class="{{ $input }}">
                         @foreach(\App\Models\BackupSchedule::FREQUENCIES as $value => $text)
                             <option value="{{ $value }}">{{ $text }}</option>
                         @endforeach
