@@ -35,8 +35,16 @@
                 <td class="px-4 py-3 text-slate-500">{{ $cat->parent?->name ?? '—' }}</td>
                 <td class="px-4 py-3">{{ $cat->posts_count }}</td>
                 <td class="px-4 py-3 text-right whitespace-nowrap">
-                    @can('categories.edit')<button x-on:click="edit=!edit" class="text-xs brand-gradient-text font-medium">Edit</button>@endcan
-                    @can('categories.delete')<form method="POST" action="{{ route('admin.categories.destroy', $cat) }}" class="inline ml-2" onsubmit="return confirm('Delete?')">@csrf @method('DELETE')<button class="text-xs text-red-500">Del</button></form>@endcan
+                    <div class="flex items-center justify-end gap-1">
+                        @can('categories.edit')
+                            <x-icon-btn icon="edit" type="button" label="Edit" x-on:click="edit=!edit" />
+                        @endcan
+                        @can('categories.delete')
+                            <form method="POST" action="{{ route('admin.categories.destroy', $cat) }}" onsubmit="return confirm('Delete?')">@csrf @method('DELETE')
+                                <x-icon-btn icon="trash" type="submit" variant="danger" label="Delete" />
+                            </form>
+                        @endcan
+                    </div>
                 </td>
             </tr>
             @empty<tr><td colspan="6" class="px-4 py-10 text-center text-slate-400">No categories yet.</td></tr>@endforelse
