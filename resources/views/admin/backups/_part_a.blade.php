@@ -1,1 +1,1 @@
-@file:///tmp/qa-mergefix/part_a.raw
+PLACEHOLDER_LOAD_FROM_FILE
