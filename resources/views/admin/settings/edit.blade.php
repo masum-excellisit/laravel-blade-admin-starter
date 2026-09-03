@@ -3,10 +3,22 @@
 @section('content')
 <div x-data="{ tab: 'general' }">
 <x-page-header title="Settings" subtitle="Configure your site, mail, analytics, maintenance, and privacy options." />
-<div class="flex gap-2 mb-6 border-b border-slate-200 dark:border-slate-700">
-    @foreach(['general'=>'General','mail'=>'Mail','analytics'=>'Analytics','maintenance'=>'Maintenance','notifications'=>'Notifications','cookie'=>'Cookie'] as $key=>$label)
-    <button x-on:click="tab='{{ $key }}'" :class="tab==='{{ $key }}' ? 'border-primary text-primary' : 'border-transparent text-slate-500'" class="px-4 py-2.5 -mb-px border-b-2 font-medium text-sm">{{ $label }}</button>
-    @endforeach
+
+{{-- Mobile: select; Desktop: scrollable tabs --}}
+<div class="mb-6 sm:hidden">
+    <label for="settings-tab" class="sr-only">Settings section</label>
+    <select id="settings-tab" x-model="tab" class="w-full rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-800 text-sm px-3.5 py-2.5 brand-ring">
+        @foreach(['general'=>'General','mail'=>'Mail','analytics'=>'Analytics','maintenance'=>'Maintenance','notifications'=>'Notifications','cookie'=>'Cookie'] as $key=>$label)
+            <option value="{{ $key }}">{{ $label }}</option>
+        @endforeach
+    </select>
+</div>
+<div class="hidden sm:block mb-6 border-b border-slate-200 dark:border-slate-700 overflow-x-auto">
+    <div class="flex gap-2 min-w-max">
+        @foreach(['general'=>'General','mail'=>'Mail','analytics'=>'Analytics','maintenance'=>'Maintenance','notifications'=>'Notifications','cookie'=>'Cookie'] as $key=>$label)
+        <button type="button" x-on:click="tab='{{ $key }}'" :class="tab==='{{ $key }}' ? 'border-primary text-primary' : 'border-transparent text-slate-500'" class="px-4 py-2.5 -mb-px border-b-2 font-medium text-sm whitespace-nowrap">{{ $label }}</button>
+        @endforeach
+    </div>
 </div>
 
 <form method="POST" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data">@csrf @method('PUT')
@@ -116,9 +128,19 @@
 
 <div x-show="tab==='mail'" x-cloak class="max-w-2xl mt-6">
     <x-card title="Send test email">
+        @php $mailHostConfigured = filled(trim((string) ($mail['mail_host'] ?? ''))); @endphp
+        @if(! $mailHostConfigured)
+            <p class="mb-3 text-sm text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 rounded-xl px-3 py-2">
+                Save an SMTP host above before sending a test email.
+            </p>
+        @endif
         <form method="POST" action="{{ route('admin.settings.test-mail') }}" class="flex gap-2 items-end">@csrf
             <div class="flex-1"><x-form.input name="test_email" type="email" label="Recipient" required /></div>
-            <x-btn variant="outline" type="submit">Send test</x-btn>
+            @if($mailHostConfigured)
+                <x-btn variant="outline" type="submit">Send test</x-btn>
+            @else
+                <x-btn variant="outline" type="submit" disabled>Send test</x-btn>
+            @endif
         </form>
     </x-card>
 </div>

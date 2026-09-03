@@ -42,7 +42,19 @@
             </div>
         </td>
     </tr>
-    @empty<tr><td colspan="7" class="px-4 py-12 text-center text-slate-400">No posts yet.</td></tr>@endforelse
+    @empty
+    <tr>
+        <td colspan="7" class="px-4 py-12 text-center text-slate-400">
+            @if(request()->filled('search') || request()->filled('status'))
+                <p class="font-medium text-slate-500">No posts match your filters.</p>
+                <p class="mt-1 text-sm">Try a different search or clear filters.</p>
+                <div class="mt-4"><x-btn :href="route('admin.posts.index')" variant="outline" size="sm">Clear filters</x-btn></div>
+            @else
+                No posts yet.
+            @endif
+        </td>
+    </tr>
+    @endforelse
 </x-table>
 {{ $posts->links() }}
 @endsection
