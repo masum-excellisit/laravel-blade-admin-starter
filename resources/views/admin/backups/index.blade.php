@@ -24,3 +24,23 @@
     $label = 'block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5';
     $activeSchedules = $schedules->where('is_active', true)->count();
 @endphp
+
+<div x-data="backupsPage()" x-on:submit.capture="guard($event)">
+
+<x-page-header title="Backups" subtitle="Create, schedule, download and restore full system backups.">
+    <x-slot:actions>
+        @can('backups.create')
+            <form method="POST" action="{{ route('admin.backups.rescan') }}"
+                  data-confirm-title="Rescan the backup folder?"
+                  data-confirm-body="Any archive sitting in the backups folder that is missing from this list will be registered."
+                  data-confirm-label="Rescan now"
+                  data-confirm-busy="Scanning the backup folder…">
+                @csrf
+                <x-btn type="submit" variant="outline"><x-icon name="restore" class="w-4 h-4" /> Rescan folder</x-btn>
+            </form>
+        @endcan
+        @can('backups.delete')
+            <x-btn variant="outline" x-on:click="cleanupOpen = true"><x-icon name="trash" class="w-4 h-4" /> Clean up</x-btn>
+        @endcan
+    </x-slot:actions>
+</x-page-header>
