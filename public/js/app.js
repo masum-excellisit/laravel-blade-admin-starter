@@ -40,6 +40,7 @@ document.addEventListener('alpine:init', () => {
     }));
 
     Alpine.data('sortableMenu', (reorderUrl) => ({
+        saving: false,
         init() {
             const el = this.$refs.list;
             if (!el || !window.Sortable) return;
@@ -47,19 +48,40 @@ document.addEventListener('alpine:init', () => {
                 handle: '[data-drag-handle]',
                 animation: 180,
                 ghostClass: 'opacity-40',
-                onEnd: async () => {
-                    const order = [...el.querySelectorAll('[data-item-id]')].map((n) => n.dataset.itemId);
-                    await fetch(reorderUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            Accept: 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content,
-                        },
-                        body: JSON.stringify({ order }),
-                    });
-                },
+                onEnd: () => this.persist(),
             });
+        },
+        async persist() {
+            const el = this.$refs.list;
+            if (!el) return;
+            const order = [...el.querySelectorAll(':scope > [data-item-id]')].map((n) => n.dataset.itemId);
+            this.saving = true;
+            try {
+                await fetch(reorderUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content,
+                    },
+                    body: JSON.stringify({ order }),
+                });
+            } finally {
+                this.saving = false;
+            }
+        },
+        move(itemEl, direction) {
+            const el = this.$refs.list;
+            if (!el || !itemEl) return;
+            const sibling = direction < 0 ? itemEl.previousElementSibling : itemEl.nextElementSibling;
+            if (!sibling || !sibling.hasAttribute('data-item-id')) return;
+            if (direction < 0) {
+                el.insertBefore(itemEl, sibling);
+            } else {
+                el.insertBefore(sibling, itemEl);
+            }
+            itemEl.querySelector('[data-drag-handle]')?.focus();
+            this.persist();
         },
     }));
 
