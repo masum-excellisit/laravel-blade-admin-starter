@@ -134,7 +134,9 @@ class CmsPlatformFeaturesTest extends TestCase
 
         Activity::log('updated', $page, 'Updated page copy', ['field' => 'body']);
 
-        $log = ActivityLog::firstOrFail();
+        $log = ActivityLog::query()
+            ->where('description', 'Updated page copy')
+            ->firstOrFail();
 
         $this->assertInstanceOf(BelongsTo::class, $log->user());
         $this->assertInstanceOf(MorphTo::class, $log->subject());

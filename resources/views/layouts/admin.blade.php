@@ -54,7 +54,7 @@
         </div>
         <div class="shrink-0 p-3 border-t border-white/10">
             <button x-on:click="collapsed=!collapsed" class="hidden lg:flex items-center gap-2 w-full px-3 py-2 rounded-xl text-slate-400 hover:bg-white/5 hover:text-white text-sm transition">
-                <svg class="w-5 h-5 shrink-0 transition-transform" :class="collapsed && 'rotate-180'" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg>
+                <svg class="w-5 h-5 shrink-0 transition-transform" :class="collapsed && 'rotate-180'" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg>
                 <span x-show="!collapsed">Collapse</span>
             </button>
         </div>
@@ -109,6 +109,7 @@
         </header>
 
         <main class="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto">
+            <x-validation-summary />
             @yield('content')
         </main>
     </div>

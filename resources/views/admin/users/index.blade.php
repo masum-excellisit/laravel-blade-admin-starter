@@ -1,7 +1,7 @@
 @extends('layouts.admin')
-@section('title', 'Admin Users')
+@section('title', 'Staff')
 @section('content')
-<x-page-header title="Admin Users" subtitle="Staff accounts with panel access and roles.">
+<x-page-header title="Staff" subtitle="Staff accounts with panel access and roles.">
     <x-slot:actions>
         @can('users.create')<x-btn :href="route('admin.users.create')"><x-icon name="plus" class="w-4 h-4" /> New admin user</x-btn>@endcan
     </x-slot:actions>
@@ -44,7 +44,14 @@
         </td>
     </tr>
     @empty
-    <tr><td colspan="7" class="px-4 py-12 text-center text-slate-400">No users found.</td></tr>
+    <tr><td colspan="7" class="px-4 py-12 text-center text-slate-400">
+        @if(request()->filled('search') || request()->filled('status') || request()->filled('role'))
+            <p class="font-medium text-slate-500">No staff match your filters.</p>
+            <div class="mt-4"><x-btn :href="route('admin.users.index')" variant="outline" size="sm">Clear filters</x-btn></div>
+        @else
+            No staff found.
+        @endif
+    </td></tr>
     @endforelse
 </x-table>
 {{ $users->links() }}

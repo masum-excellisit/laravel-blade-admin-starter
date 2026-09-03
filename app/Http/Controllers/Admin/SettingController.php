@@ -61,10 +61,37 @@ class SettingController extends Controller
         abort_unless($request->user()->can('settings.edit'), 403);
         $request->validate(['test_email' => ['required', 'email']]);
 
+        $mail = Setting::group('mail');
+        $host = trim((string) ($mail['mail_host'] ?? ''));
+
+        if ($host === '') {
+            return back()
+                ->withInput()
+                ->with('error', 'Add an SMTP host in Mail settings and save before sending a test email.');
+        }
+
+        $siteName = Setting::get('site_name', config('app.name'));
+
+        config([
+            'mail.default' => 'smtp',
+            'mail.mailers.smtp.host' => $host,
+            'mail.mailers.smtp.port' => (int) ($mail['mail_port'] ?? 587),
+            'mail.mailers.smtp.username' => $mail['mail_username'] ?? null,
+            'mail.mailers.smtp.password' => $mail['mail_password'] ?? null,
+            'mail.mailers.smtp.encryption' => ($mail['mail_encryption'] ?? 'tls') === 'null'
+                ? null
+                : ($mail['mail_encryption'] ?? 'tls'),
+            'mail.from.address' => $mail['mail_from_address'] ?? config('mail.from.address'),
+            'mail.from.name' => $mail['mail_from_name'] ?? $siteName,
+        ]);
+
         try {
-            Mail::raw('This is a test email from '.($settings['site_name'] ?? config('app.name')).'. Your mail settings work!', function ($m) use ($request) {
-                $m->to($request->test_email)->subject('Test email');
-            });
+            Mail::mailer('smtp')->raw(
+                'This is a test email from '.$siteName.'. Your mail settings work!',
+                function ($m) use ($request) {
+                    $m->to($request->test_email)->subject('Test email');
+                }
+            );
         } catch (\Throwable $e) {
             return back()->with('error', 'Mail failed: '.$e->getMessage());
         }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Support\Activity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
@@ -48,11 +49,17 @@ class LoginController extends Controller
         $request->session()->regenerate();
         Auth::user()->forceFill(['last_login_at' => now()])->save();
 
+        Activity::log('login', Auth::user(), 'Admin signed in');
+
         return redirect()->intended(route('admin.dashboard'));
     }
 
     public function logout(Request $request)
     {
+        if (Auth::check()) {
+            Activity::log('logout', Auth::user(), 'Admin signed out');
+        }
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

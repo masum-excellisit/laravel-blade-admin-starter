@@ -160,22 +160,28 @@ class AdminPanelEnhancementsTest extends TestCase
 
     public function test_sidebar_order_keeps_access_control_below_settings(): void
     {
-        $html = $this->actingAs($this->admin())
+        $response = $this->actingAs($this->admin())
             ->get(route('admin.dashboard'))
             ->assertOk()
-            ->getContent();
+            ->assertSee('People')
+            ->assertSee('Customers')
+            ->assertSee('Staff')
+            ->assertSee('Settings')
+            ->assertSee('Roles')
+            ->assertSee('Services');
 
+        $html = $response->getContent();
         $settingsPos = strpos($html, '>Settings</span>');
-        $usersPos = strpos($html, '>Admin Users</span>');
+        $peoplePos = strpos($html, '>People</span>');
         $rolesPos = strpos($html, '>Roles</span>');
         $servicesPos = strpos($html, '>Services</span>');
 
         $this->assertNotFalse($settingsPos);
-        $this->assertNotFalse($usersPos);
+        $this->assertNotFalse($peoplePos);
         $this->assertNotFalse($rolesPos);
         $this->assertNotFalse($servicesPos);
+        $this->assertTrue($peoplePos < $servicesPos, 'People group should appear before Services');
         $this->assertTrue($servicesPos < $settingsPos, 'Services should appear before Settings');
-        $this->assertTrue($settingsPos < $usersPos, 'Settings should appear before Admin Users');
-        $this->assertTrue($usersPos < $rolesPos, 'Admin Users should appear before Roles');
+        $this->assertTrue($settingsPos < $rolesPos, 'Settings should appear before Roles');
     }
 }

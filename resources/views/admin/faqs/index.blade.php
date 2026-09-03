@@ -49,7 +49,14 @@
         </td>
     </tr>
     @empty
-    <tr><td colspan="7" class="px-4 py-12 text-center text-slate-400">No FAQs yet.</td></tr>
+    <tr><td colspan="7" class="px-4 py-12 text-center text-slate-400">
+        @if(request()->filled('search') || request()->filled('status'))
+            <p class="font-medium text-slate-500">No FAQs match your filters.</p>
+            <div class="mt-4"><x-btn :href="route('admin.faqs.index')" variant="outline" size="sm">Clear filters</x-btn></div>
+        @else
+            No FAQs yet.
+        @endif
+    </td></tr>
     @endforelse
 </x-table>
 {{ $faqs->links() }}

@@ -26,6 +26,7 @@
     <!-- Form side -->
     <div class="flex items-center justify-center p-6 sm:p-12">
         <div class="w-full max-w-sm">
+            <x-validation-summary />
             @yield('content')
         </div>
     </div>

@@ -55,11 +55,6 @@ class JobController extends Controller
             'status' => 'new',
         ]);
 
-        Activity::log('created', $application, 'Job application submitted', [
-            'job' => $job->title,
-            'email' => $application->email,
-        ]);
-
         $this->sendApplicationNotification($application);
 
         return back()->with('success', 'Application submitted. Thank you!');

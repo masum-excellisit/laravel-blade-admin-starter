@@ -30,6 +30,6 @@
                 'permission' => 'posts.edit',
             ])
         @endif
-        <x-seo-fields :model="$post" />
+        <x-seo-fields :model="$post" :fallback-title="old('title', $post->title)" />
     </div>
 </div>

@@ -52,7 +52,14 @@
         </td>
     </tr>
     @empty
-    <tr><td colspan="7" class="px-4 py-12 text-center text-slate-400">No portfolio items yet.</td></tr>
+    <tr><td colspan="7" class="px-4 py-12 text-center text-slate-400">
+        @if(request()->filled('search') || request()->filled('status'))
+            <p class="font-medium text-slate-500">No portfolio items match your filters.</p>
+            <div class="mt-4"><x-btn :href="route('admin.portfolio.index')" variant="outline" size="sm">Clear filters</x-btn></div>
+        @else
+            No portfolio items yet.
+        @endif
+    </td></tr>
     @endforelse
 </x-table>
 {{ $portfolioItems->links() }}

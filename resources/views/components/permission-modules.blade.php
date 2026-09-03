@@ -8,8 +8,10 @@
 
 @php
     $assigned = collect($assigned)->map(fn ($v) => (string) $v)->all();
-    $totalPermissions = collect($modules)->sum(fn ($permissions) => count($permissions));
-    $totalModules = count($modules);
+    $modules = collect($modules);
+    $totalPermissions = $modules->sum(fn ($permissions) => count($permissions));
+    $totalModules = $modules->count();
+    $moduleKeys = $modules->keys()->all();
 
     $actionMeta = [
         'view' => [
@@ -37,15 +39,16 @@
 
 <div
     class="perm-modules"
-    @if($searchable)
-        x-data="{
-            query: '',
-            matches(text) {
-                if (!this.query.trim()) return true;
-                return text.toLowerCase().includes(this.query.trim().toLowerCase());
-            }
-        }"
-    @endif
+    x-data="{
+        query: '',
+        open: @js(array_fill_keys($moduleKeys, true)),
+        matches(text) {
+            if (!this.query.trim()) return true;
+            return text.toLowerCase().includes(this.query.trim().toLowerCase());
+        },
+        expandAll() { Object.keys(this.open).forEach(k => this.open[k] = true) },
+        collapseAll() { Object.keys(this.open).forEach(k => this.open[k] = false) },
+    }"
 >
     <div class="perm-modules__toolbar">
         <div class="perm-modules__stats">
@@ -69,12 +72,16 @@
             </div>
         </div>
 
-        @if($searchable)
-            <div class="perm-modules__search">
-                <svg class="perm-modules__search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                <input type="search" x-model="query" placeholder="Filter modules or permissions…" class="perm-modules__search-input">
-            </div>
-        @endif
+        <div class="flex flex-wrap items-center gap-2">
+            <button type="button" class="text-xs font-semibold text-slate-500 hover:text-primary px-2 py-1" x-on:click="expandAll()">Expand all</button>
+            <button type="button" class="text-xs font-semibold text-slate-500 hover:text-primary px-2 py-1" x-on:click="collapseAll()">Collapse all</button>
+            @if($searchable)
+                <div class="perm-modules__search">
+                    <svg class="perm-modules__search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    <input type="search" x-model="query" placeholder="Filter modules or permissions…" class="perm-modules__search-input">
+                </div>
+            @endif
+        </div>
     </div>
 
     @if(empty($modules))
@@ -93,10 +100,8 @@
 
                 <div
                     class="perm-card"
-                    @if($searchable)
-                        x-show="matches(@js($searchBlob))"
-                        x-cloak
-                    @endif
+                    x-show="matches(@js($searchBlob))"
+                    x-cloak
                 >
                     <div
                         @if($selectable)
@@ -112,13 +117,15 @@
                         @endif
                     >
                         <div class="perm-card__header">
-                            <span class="perm-card__avatar">{{ $moduleInitial }}</span>
-                            <div class="perm-card__title-wrap">
+                            <button type="button" class="perm-card__avatar" x-on:click="open[@js($module)] = !open[@js($module)]" :aria-expanded="open[@js($module)] ? 'true' : 'false'">
+                                {{ $moduleInitial }}
+                            </button>
+                            <button type="button" class="perm-card__title-wrap text-left flex-1 min-w-0" x-on:click="open[@js($module)] = !open[@js($module)]">
                                 <h3 class="perm-card__title">{{ $moduleLabel }}</h3>
-                            </div>
+                            </button>
 
                             @if($selectable)
-                                <label class="perm-card__all">
+                                <label class="perm-card__all" x-on:click.stop>
                                     <input
                                         type="checkbox"
                                         class="perm-card__checkbox"
@@ -137,9 +144,12 @@
                                     {{ count($permissions) }}
                                 @endif
                             </span>
+                            <button type="button" class="text-slate-400 hover:text-slate-600 p-1" x-on:click="open[@js($module)] = !open[@js($module)]" aria-label="Toggle module">
+                                <svg class="w-4 h-4 transition-transform" :class="open[@js($module)] && 'rotate-180'" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
                         </div>
 
-                        <ul class="perm-card__list">
+                        <ul class="perm-card__list" x-show="open[@js($module)]" x-cloak>
                             @foreach($permissions as $permission)
                                 @php
                                     $parts = explode('.', $permission->name);

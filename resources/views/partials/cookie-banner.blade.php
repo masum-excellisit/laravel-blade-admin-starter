@@ -16,9 +16,11 @@
     x-show="visible"
     x-cloak
     x-transition
-    class="fixed inset-x-0 bottom-0 z-50 px-4 pb-4 sm:px-6"
+    class="border-t border-slate-200 bg-slate-950 text-white"
+    role="dialog"
+    aria-label="Cookie notice"
 >
-    <div class="max-w-5xl mx-auto rounded-2xl bg-slate-950 text-white shadow-2xl border border-white/10 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center gap-4">
         <p class="text-sm text-white/80 flex-1">
             {{ $cookieMessage }}
             @if($cookiePolicyUrl)

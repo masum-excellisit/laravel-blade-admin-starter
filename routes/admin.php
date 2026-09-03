@@ -111,7 +111,11 @@ Route::middleware('auth')->group(function () {
     });
     Route::middleware('permission:categories.view')->group(function () {
         Route::post('categories/bulk', [CategoryController::class, 'bulk'])->name('categories.bulk');
-        Route::resource('categories', CategoryController::class)->except('show', 'create', 'edit');
+        // Inline create on index — redirect stale /create links instead of 405.
+        Route::get('categories/create', fn () => redirect()->route('admin.categories.index'))->name('categories.create');
+        Route::resource('categories', CategoryController::class)
+            ->except('show', 'create', 'edit')
+            ->whereNumber('category');
     });
     Route::middleware('permission:menus.view')->group(function () {
         Route::post('menus/bulk', [MenuController::class, 'bulk'])->name('menus.bulk');
